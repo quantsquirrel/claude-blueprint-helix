@@ -1,0 +1,4 @@
+node_modules/
+.omc/state/
+*.log
+.DS_Store

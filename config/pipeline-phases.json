@@ -1,0 +1,23 @@
+{
+  "phases": [
+    {"index": 0, "name": "requirements", "agent": "oh-my-claudecode:analyst", "gate": "requirements document exists"},
+    {"index": 1, "name": "architecture", "agent": "oh-my-claudecode:architect", "gate": "architecture decision recorded"},
+    {"index": 2, "name": "design", "agent": "blueprint-helix:design-writer", "gate": "design document exists"},
+    {"index": 3, "name": "implementation", "agent": "oh-my-claudecode:executor", "gate": "code changes committed"},
+    {"index": 4, "name": "unit-test", "agent": "oh-my-claudecode:test-engineer", "gate": "unit tests pass"},
+    {"index": 5, "name": "integration-test", "agent": "oh-my-claudecode:test-engineer", "gate": "integration tests pass"},
+    {"index": 6, "name": "code-review", "agent": "oh-my-claudecode:code-reviewer", "gate": "review approved"},
+    {"index": 7, "name": "gap-analysis", "agent": "blueprint-helix:gap-detector", "gate": "no critical gaps"},
+    {"index": 8, "name": "verification", "agent": "oh-my-claudecode:verifier", "gate": "all checks pass"}
+  ],
+  "presets": {
+    "full": {"phases": [0,1,2,3,4,5,6,7,8], "description": "Full 9-stage pipeline"},
+    "standard": {"phases": [0,2,3,4,6,8], "description": "Standard 6-stage pipeline"},
+    "minimal": {"phases": [2,3,8], "description": "Minimal 3-stage pipeline"}
+  },
+  "defaults": {
+    "preset": "standard",
+    "on_error": "pause",
+    "max_retries": 2
+  }
+}
