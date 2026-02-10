@@ -13,10 +13,11 @@
   "presets": {
     "full": {"phases": [0,1,2,3,4,5,6,7,8], "description": "Full 9-stage pipeline"},
     "standard": {"phases": [0,2,3,4,6,8], "description": "Standard 6-stage pipeline"},
-    "minimal": {"phases": [2,3,8], "description": "Minimal 3-stage pipeline"}
+    "minimal": {"phases": [2,3,8], "description": "Minimal 3-stage pipeline"},
+    "auto": {"phases": null, "description": "Auto-detect based on workspace complexity"}
   },
   "defaults": {
-    "preset": "standard",
+    "preset": "auto",
     "on_error": "pause",
     "max_retries": 2
   }

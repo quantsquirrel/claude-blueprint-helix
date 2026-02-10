@@ -18,35 +18,11 @@ import {
   releaseLock
 } from './lib/state-manager.mjs';
 import { PDCA_PHASES, PIPELINE_PHASES, STATE_PATHS, CYCLE_STATUS, RUN_STATUS } from './lib/constants.mjs';
+import { readStdin } from './lib/io.mjs';
+import { error, info } from './lib/logger.mjs';
 
 // Tools that indicate meaningful work progress
 const TRACKED_TOOLS = new Set(['Task', 'Write', 'Edit', 'Bash']);
-
-// Read stdin with timeout protection
-function readStdin(timeoutMs = 4000) {
-  return new Promise((resolve) => {
-    const chunks = [];
-    let settled = false;
-    const timeout = setTimeout(() => {
-      if (!settled) {
-        settled = true;
-        process.stdin.removeAllListeners();
-        try { process.stdin.destroy(); } catch { /* ignore */ }
-        resolve(Buffer.concat(chunks).toString('utf-8'));
-      }
-    }, timeoutMs);
-    process.stdin.on('data', (chunk) => { chunks.push(chunk); });
-    process.stdin.on('end', () => {
-      if (!settled) { settled = true; clearTimeout(timeout); resolve(Buffer.concat(chunks).toString('utf-8')); }
-    });
-    process.stdin.on('error', () => {
-      if (!settled) { settled = true; clearTimeout(timeout); resolve(''); }
-    });
-    if (process.stdin.readableEnded) {
-      if (!settled) { settled = true; clearTimeout(timeout); resolve(Buffer.concat(chunks).toString('utf-8')); }
-    }
-  });
-}
 
 // Update activity timestamp on active PDCA cycles
 function trackPdcaActivity(blueprintDir) {
@@ -101,6 +77,7 @@ function trackPipelineActivity(blueprintDir) {
 }
 
 async function main() {
+  info('phase-tracker', 'Hook started');
   try {
     const input = await readStdin();
     if (!input.trim()) {
@@ -133,8 +110,8 @@ async function main() {
     trackPipelineActivity(blueprintDir);
 
     process.stdout.write(JSON.stringify({ continue: true }));
-  } catch {
-    // On any error, allow continuation
+  } catch (err) {
+    error('phase-tracker', `Unexpected error: ${err?.message || err}`, { stack: err?.stack });
     process.stdout.write(JSON.stringify({ continue: true }));
   }
 }

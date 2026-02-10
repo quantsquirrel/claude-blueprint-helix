@@ -4,13 +4,15 @@
 /**
  * Blueprint Helix MCP Server
  *
- * Provides read-only access to PDCA cycles, gap analyses, and pipeline runs
+ * Provides read and write access to PDCA cycles, gap analyses, and pipeline runs
  * via Model Context Protocol (MCP) over stdio JSON-RPC.
  *
  * Tools:
  * - pdca_status: Query PDCA cycle status
  * - gap_measure: Measure gap analysis metrics
  * - pipeline_progress: Check development pipeline progress
+ * - pdca_update: Update PDCA cycle phase or status (buffered)
+ * - pipeline_advance: Advance pipeline to next phase or update status (buffered)
  */
 
 const fs = require('fs');
@@ -80,6 +82,32 @@ function listJsonFiles(dirPath) {
 // ============================================================================
 // MCP Tool Implementations
 // ============================================================================
+
+/**
+ * Write a pending update to the buffer file.
+ * @param {string} type - 'pdca' or 'pipeline'
+ * @param {object} update - Update data
+ */
+function writePendingUpdate(type, update) {
+  const bpRoot = findBlueprintRoot();
+  const pendingPath = path.join(bpRoot, 'pending_updates.json');
+
+  let pending = [];
+  try {
+    const raw = fs.readFileSync(pendingPath, 'utf-8');
+    pending = JSON.parse(raw);
+    if (!Array.isArray(pending)) pending = [];
+  } catch { /* file doesn't exist yet */ }
+
+  pending.push({
+    type,
+    timestamp: new Date().toISOString(),
+    ...update
+  });
+
+  fs.mkdirSync(bpRoot, { recursive: true });
+  fs.writeFileSync(pendingPath, JSON.stringify(pending, null, 2) + '\n', 'utf-8');
+}
 
 /**
  * Tool: pdca_status
@@ -214,6 +242,52 @@ function pipelineProgress(args) {
   return { pipelines };
 }
 
+/**
+ * Tool: pdca_update
+ * Update PDCA cycle phase or status.
+ * @param {object} args - { cycle_id, phase?, status?, notes? }
+ * @returns {object} { success, message, pending_update }
+ */
+function pdcaUpdate(args) {
+  const update = {
+    cycle_id: args.cycle_id,
+    ...(args.phase && { phase: args.phase }),
+    ...(args.status && { status: args.status }),
+    ...(args.notes && { notes: args.notes })
+  };
+
+  writePendingUpdate('pdca', update);
+
+  return {
+    success: true,
+    message: `PDCA update queued for cycle ${args.cycle_id}`,
+    pending_update: update
+  };
+}
+
+/**
+ * Tool: pipeline_advance
+ * Advance pipeline to next phase or update phase status.
+ * @param {object} args - { run_id, action, phase_output?, notes? }
+ * @returns {object} { success, message, pending_update }
+ */
+function pipelineAdvance(args) {
+  const update = {
+    run_id: args.run_id,
+    action: args.action,
+    ...(args.phase_output && { phase_output: args.phase_output }),
+    ...(args.notes && { notes: args.notes })
+  };
+
+  writePendingUpdate('pipeline', update);
+
+  return {
+    success: true,
+    message: `Pipeline ${args.action} queued for run ${args.run_id}`,
+    pending_update: update
+  };
+}
+
 // ============================================================================
 // MCP Server Protocol
 // ============================================================================
@@ -256,6 +330,34 @@ const TOOLS = [
           description: 'Optional: specific pipeline run ID to query'
         }
       }
+    }
+  },
+  {
+    name: 'pdca_update',
+    description: 'Update PDCA cycle phase or status. Writes to pending buffer for safe merge.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        cycle_id: { type: 'string', description: 'PDCA cycle ID to update' },
+        phase: { type: 'string', enum: ['plan', 'do', 'check', 'act'], description: 'New phase' },
+        status: { type: 'string', enum: ['active', 'paused', 'completed', 'failed'], description: 'New status' },
+        notes: { type: 'string', description: 'Optional notes for this update' }
+      },
+      required: ['cycle_id']
+    }
+  },
+  {
+    name: 'pipeline_advance',
+    description: 'Advance pipeline to next phase or update phase status. Writes to pending buffer for safe merge.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        run_id: { type: 'string', description: 'Pipeline run ID' },
+        action: { type: 'string', enum: ['advance', 'complete_phase', 'fail_phase', 'pause', 'resume'], description: 'Action to take' },
+        phase_output: { type: 'string', description: 'Output/summary from the completed phase' },
+        notes: { type: 'string', description: 'Optional notes' }
+      },
+      required: ['run_id', 'action']
     }
   }
 ];
@@ -313,6 +415,12 @@ function handleRequest(request) {
             break;
           case 'pipeline_progress':
             toolResult = pipelineProgress(args);
+            break;
+          case 'pdca_update':
+            toolResult = pdcaUpdate(args);
+            break;
+          case 'pipeline_advance':
+            toolResult = pipelineAdvance(args);
             break;
           default:
             throw new Error(`Unknown tool: ${name}`);
@@ -387,4 +495,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { pdcaStatus, gapMeasure, pipelineProgress };
+module.exports = { pdcaStatus, gapMeasure, pipelineProgress, pdcaUpdate, pipelineAdvance };

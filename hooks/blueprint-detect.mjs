@@ -10,35 +10,11 @@
 
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readStdin } from './lib/io.mjs';
+import { error, info } from './lib/logger.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-// Read stdin with timeout protection
-function readStdin(timeoutMs = 4000) {
-  return new Promise((resolve) => {
-    const chunks = [];
-    let settled = false;
-    const timeout = setTimeout(() => {
-      if (!settled) {
-        settled = true;
-        process.stdin.removeAllListeners();
-        try { process.stdin.destroy(); } catch { /* ignore */ }
-        resolve(Buffer.concat(chunks).toString('utf-8'));
-      }
-    }, timeoutMs);
-    process.stdin.on('data', (chunk) => { chunks.push(chunk); });
-    process.stdin.on('end', () => {
-      if (!settled) { settled = true; clearTimeout(timeout); resolve(Buffer.concat(chunks).toString('utf-8')); }
-    });
-    process.stdin.on('error', () => {
-      if (!settled) { settled = true; clearTimeout(timeout); resolve(''); }
-    });
-    if (process.stdin.readableEnded) {
-      if (!settled) { settled = true; clearTimeout(timeout); resolve(Buffer.concat(chunks).toString('utf-8')); }
-    }
-  });
-}
 
 // Extract prompt from various JSON structures
 function extractPrompt(input) {
@@ -141,6 +117,7 @@ function createHookOutput(additionalContext) {
 }
 
 async function main() {
+  info('blueprint-detect', 'Hook started');
   try {
     const input = await readStdin();
     if (!input.trim()) {
@@ -170,8 +147,8 @@ async function main() {
     }
 
     process.stdout.write(JSON.stringify(createHookOutput(context)));
-  } catch {
-    // On any error, allow continuation
+  } catch (err) {
+    error('blueprint-detect', `Unexpected error: ${err?.message || err}`, { stack: err?.stack });
     process.stdout.write(JSON.stringify({ continue: true }));
   }
 }

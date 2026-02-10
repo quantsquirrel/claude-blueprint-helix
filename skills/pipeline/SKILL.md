@@ -28,7 +28,7 @@ Do NOT use when:
 | Argument | Required | Description |
 |----------|----------|-------------|
 | `feature` | Yes | Feature description or path to requirements doc |
-| `--preset=X` | No | Pipeline preset: `full`, `standard`, `minimal` (default: standard) |
+| `--preset=X` | No | Pipeline preset: `full`, `standard`, `minimal`, `auto` (default: auto) |
 | `--start-phase=N` | No | Start from phase N (requires previous phases completed) |
 | `--skip-phases=N,N` | No | Skip specific phases (use cautiously) |
 | `--on-error=X` | No | Error handling: `abort`, `skip`, `pause` (default: pause) |
@@ -78,6 +78,14 @@ Lightweight pipeline for simple changes.
 Use when: Bug fixes, small features, prototypes
 
 ## Workflow
+
+### 0. Auto-Preset Detection (when --preset=auto or no preset specified)
+
+When preset is `auto` or omitted:
+1. Run complexity analysis on the current workspace
+2. Print reasoning: "Auto-preset: {preset} ({fileCount} files, {locDelta} LOC, {moduleCount} modules) [confidence: {score}%]"
+3. Use the recommended preset
+4. User can always override with explicit --preset=minimal|standard|full
 
 ### 1. Initialize Pipeline Run
 Create pipeline state:

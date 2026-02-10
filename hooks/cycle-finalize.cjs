@@ -22,6 +22,40 @@ const {
 } = require('fs');
 const { join, dirname } = require('path');
 
+// Inline logging function for CJS (cannot import from logger.mjs)
+function logError(hookName, message, meta) {
+  try {
+    const logDir = findBlueprintDir(process.cwd());
+    if (!existsSync(logDir)) mkdirSync(logDir, { recursive: true });
+    const logPath = join(logDir, 'debug.log');
+    const timestamp = new Date().toISOString();
+    let entry = `[${timestamp}] [ERROR] [${hookName}] ${message}`;
+    if (meta) entry += ` | ${JSON.stringify(meta)}`;
+    writeFileSync(logPath, entry + '\n', { flag: 'a', encoding: 'utf-8' });
+
+    // Check strict mode
+    if (process.env.BLUEPRINT_HOOK_STRICT === '1') {
+      process.stderr.write(`[BLUEPRINT ERROR] [${hookName}] ${message}\n`);
+      process.exit(1);
+    }
+  } catch {
+    // Never throw from logger
+  }
+}
+
+function logInfo(hookName, message) {
+  try {
+    const logDir = findBlueprintDir(process.cwd());
+    if (!existsSync(logDir)) mkdirSync(logDir, { recursive: true });
+    const logPath = join(logDir, 'debug.log');
+    const timestamp = new Date().toISOString();
+    const entry = `[${timestamp}] [INFO] [${hookName}] ${message}\n`;
+    writeFileSync(logPath, entry, { flag: 'a', encoding: 'utf-8' });
+  } catch {
+    // Never throw from logger
+  }
+}
+
 // Inline readStdin for CJS
 async function readStdin(timeoutMs = 5000) {
   return new Promise((resolve) => {
@@ -168,6 +202,7 @@ function suspendGapAnalyses(blueprintDir) {
 }
 
 async function main() {
+  logInfo('cycle-finalize', 'Hook started');
   try {
     const input = await readStdin();
     let data = {};
@@ -205,9 +240,8 @@ async function main() {
 
     // Always allow stop — never block
     console.log(JSON.stringify({ continue: true }));
-  } catch (error) {
-    // On any error, allow stop
-    console.error(`[cycle-finalize] Error: ${error.message}`);
+  } catch (err) {
+    logError('cycle-finalize', `Unexpected error: ${err?.message || err}`, { stack: err?.stack });
     console.log(JSON.stringify({ continue: true }));
   }
 }

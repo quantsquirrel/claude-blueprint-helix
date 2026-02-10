@@ -18,32 +18,8 @@ import {
   listActiveItems
 } from './lib/state-manager.mjs';
 import { STATE_PATHS, CYCLE_STATUS, RUN_STATUS } from './lib/constants.mjs';
-
-// Read stdin with timeout protection
-function readStdin(timeoutMs = 4000) {
-  return new Promise((resolve) => {
-    const chunks = [];
-    let settled = false;
-    const timeout = setTimeout(() => {
-      if (!settled) {
-        settled = true;
-        process.stdin.removeAllListeners();
-        try { process.stdin.destroy(); } catch { /* ignore */ }
-        resolve(Buffer.concat(chunks).toString('utf-8'));
-      }
-    }, timeoutMs);
-    process.stdin.on('data', (chunk) => { chunks.push(chunk); });
-    process.stdin.on('end', () => {
-      if (!settled) { settled = true; clearTimeout(timeout); resolve(Buffer.concat(chunks).toString('utf-8')); }
-    });
-    process.stdin.on('error', () => {
-      if (!settled) { settled = true; clearTimeout(timeout); resolve(''); }
-    });
-    if (process.stdin.readableEnded) {
-      if (!settled) { settled = true; clearTimeout(timeout); resolve(Buffer.concat(chunks).toString('utf-8')); }
-    }
-  });
-}
+import { readStdin } from './lib/io.mjs';
+import { error, info } from './lib/logger.mjs';
 
 // Collect active PDCA cycle summaries for preservation
 function collectActivePdca(blueprintDir) {
@@ -117,6 +93,7 @@ function collectActiveGaps(blueprintDir) {
 }
 
 async function main() {
+  info('compact-preserver', 'Hook started');
   try {
     const input = await readStdin();
     let data = {};
@@ -176,8 +153,8 @@ async function main() {
         additionalContext: lines.join('\n')
       }
     }));
-  } catch {
-    // On any error, allow compaction to proceed
+  } catch (err) {
+    error('compact-preserver', `Unexpected error: ${err?.message || err}`, { stack: err?.stack });
     process.stdout.write(JSON.stringify({ continue: true }));
   }
 }

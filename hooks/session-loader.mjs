@@ -20,37 +20,13 @@ import {
   ensureDir
 } from './lib/state-manager.mjs';
 import { STATE_PATHS, CYCLE_STATUS, RUN_STATUS, PDCA_PHASES, PIPELINE_PHASES } from './lib/constants.mjs';
+import { readStdin } from './lib/io.mjs';
+import { error, info } from './lib/logger.mjs';
 
 // Max age for orphaned state: 24 hours
 const ORPHAN_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 // Max age for stale locks: 5 minutes
 const STALE_LOCK_AGE_MS = 5 * 60 * 1000;
-
-// Read stdin with timeout protection
-function readStdin(timeoutMs = 4000) {
-  return new Promise((resolve) => {
-    const chunks = [];
-    let settled = false;
-    const timeout = setTimeout(() => {
-      if (!settled) {
-        settled = true;
-        process.stdin.removeAllListeners();
-        try { process.stdin.destroy(); } catch { /* ignore */ }
-        resolve(Buffer.concat(chunks).toString('utf-8'));
-      }
-    }, timeoutMs);
-    process.stdin.on('data', (chunk) => { chunks.push(chunk); });
-    process.stdin.on('end', () => {
-      if (!settled) { settled = true; clearTimeout(timeout); resolve(Buffer.concat(chunks).toString('utf-8')); }
-    });
-    process.stdin.on('error', () => {
-      if (!settled) { settled = true; clearTimeout(timeout); resolve(''); }
-    });
-    if (process.stdin.readableEnded) {
-      if (!settled) { settled = true; clearTimeout(timeout); resolve(Buffer.concat(chunks).toString('utf-8')); }
-    }
-  });
-}
 
 // Clean up stale .lock files in a directory
 function cleanStaleLocks(dirPath) {
@@ -163,6 +139,7 @@ function summarizeGapAnalyses(blueprintDir) {
 }
 
 async function main() {
+  info('session-loader', 'Hook started');
   try {
     const input = await readStdin();
     let data = {};
@@ -239,7 +216,8 @@ async function main() {
     } else {
       process.stdout.write(JSON.stringify({ continue: true }));
     }
-  } catch {
+  } catch (err) {
+    error('session-loader', `Unexpected error: ${err?.message || err}`, { stack: err?.stack });
     process.stdout.write(JSON.stringify({ continue: true }));
   }
 }
