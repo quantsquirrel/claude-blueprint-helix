@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-02-11
+
+### Added
+
+#### Pipeline Auto-Preset
+- 3-axis complexity analyzer (`hooks/lib/complexity-analyzer.mjs`)
+  - Analyzes git diff to compute fileCount, LOC delta, moduleCount
+  - Automatic preset recommendation: minimal / standard / full
+  - Confidence score and human-readable reasoning
+- `--preset=auto` is now the default for `/blueprint:pipeline`
+- Users can always override with explicit `--preset=minimal|standard|full`
+
+#### Debug Logging
+- Dual-mode logging utility (`hooks/lib/logger.mjs`)
+  - Default: silently writes to `.blueprint/debug.log` (never blocks Claude Code)
+  - Strict mode: `BLUEPRINT_HOOK_STRICT=1` exits with code 1 on errors (CI opt-in)
+- All 6 hooks now log errors and startup info instead of failing silently
+
+#### MCP Write Tools
+- `pdca_update` - Update PDCA cycle phase or status
+- `pipeline_advance` - Advance pipeline to next phase or update phase status
+- Buffered write via `pending_updates.json` (merged by cycle-finalize hook)
+
+### Changed
+
+#### Code Deduplication
+- Extracted shared `readStdin()` to `hooks/lib/io.mjs` (was duplicated in 5 ESM hooks)
+- ~120 lines of duplicated code removed
+
+#### Configuration
+- `config/pipeline-phases.json` default preset changed from `standard` to `auto`
+
+---
+
 ## [1.1.0] - 2026-02-10
 
 ### Added
@@ -217,5 +251,6 @@ None (initial release)
 
 ---
 
+[1.2.0]: https://github.com/quantsquirrel/claude-blueprint-helix/releases/tag/v1.2.0
 [1.1.0]: https://github.com/quantsquirrel/claude-blueprint-helix/releases/tag/v1.1.0
 [1.0.0]: https://github.com/quantsquirrel/claude-blueprint-helix/releases/tag/v1.0.0
