@@ -9,6 +9,5 @@
   "homepage": "https://github.com/quantsquirrel/claude-blueprint-helix",
   "license": "MIT",
   "keywords": ["claude-code", "pdca", "gap-analysis", "dev-pipeline", "development-methodology"],
-  "skills": "./skills/",
-  "mcpServers": "./.mcp.json"
+  "skills": "./skills/"
 }
