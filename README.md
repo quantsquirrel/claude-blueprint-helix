@@ -14,7 +14,7 @@ A Claude Code plugin that brings structured development methodologies to AI-assi
 ## Installation
 
 ```bash
-claude plugin add quantsquirrel/claude-blueprint-helix
+claude plugin add quantsquirrel/claude-blueprint
 ```
 
 ## Quick Start
@@ -134,10 +134,10 @@ Configuration files in `config/`:
   "phase_timeout_ms": 300000,
   "auto_act": false,
   "default_agents": {
-    "plan": ["oh-my-claudecode:analyst", "blueprint-helix:pdca-iterator"],
+    "plan": ["oh-my-claudecode:analyst", "blueprint:pdca-iterator"],
     "do": ["oh-my-claudecode:executor"],
     "check": ["oh-my-claudecode:verifier"],
-    "act": ["blueprint-helix:pdca-iterator"]
+    "act": ["blueprint:pdca-iterator"]
   }
 }
 ```

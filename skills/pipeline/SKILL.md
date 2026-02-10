@@ -118,12 +118,12 @@ For each phase:
 const phaseConfig = {
   requirements: {agent: "oh-my-claudecode:analyst", model: "opus"},
   architecture: {agent: "oh-my-claudecode:architect", model: "opus"},
-  design: {agent: "blueprint-helix:design-writer", model: "sonnet"},
+  design: {agent: "blueprint:design-writer", model: "sonnet"},
   implementation: {agent: "oh-my-claudecode:executor", model: "sonnet"},
   "unit-tests": {agent: "oh-my-claudecode:test-engineer", model: "sonnet"},
   "integration-tests": {agent: "oh-my-claudecode:test-engineer", model: "sonnet"},
   "code-review": {agent: "oh-my-claudecode:code-reviewer", model: "opus"},
-  "gap-analysis": {agent: "blueprint-helix:gap-detector", model: "opus"},
+  "gap-analysis": {agent: "blueprint:gap-detector", model: "opus"},
   verification: {agent: "oh-my-claudecode:verifier", model: "sonnet"}
 };
 

@@ -94,7 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Cross-session persistence
 
 #### Agent Discovery
-- Plugin agent loading (`blueprint-helix:agent-name`)
+- Plugin agent loading (`blueprint:agent-name`)
 - Fallback to oh-my-claudecode agents
 - Inline prompt fallback for robustness
 - Graceful degradation when agents unavailable

@@ -106,7 +106,7 @@ describe('config file validation', () => {
     it('should have name field', () => {
       config = readJsonConfig('plugin.json');
       assert.equal(typeof config.name, 'string');
-      assert.equal(config.name, 'blueprint-helix');
+      assert.equal(config.name, 'blueprint');
     });
 
     it('should have version field', () => {

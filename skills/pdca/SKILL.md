@@ -66,7 +66,7 @@ Spawn agents to analyze current state and create improvement plan:
 **Primary path (with fallback):**
 ```javascript
 // Try plugin agent first
-Task(subagent_type="blueprint-helix:pdca-iterator",
+Task(subagent_type="blueprint:pdca-iterator",
      model="sonnet",
      prompt="Plan phase: Analyze task and create improvement plan.\nTask: {user_task}\nIteration: {N}")
 
@@ -106,7 +106,7 @@ Decide whether to continue iterating or complete:
 **Primary path (with fallback):**
 ```javascript
 // Try plugin agent first
-Task(subagent_type="blueprint-helix:pdca-iterator",
+Task(subagent_type="blueprint:pdca-iterator",
      model="sonnet",
      prompt="Act phase: Review verification results and decide next action.\nVerification: {check_output}\nIteration: {N}/{max_iterations}")
 
@@ -198,7 +198,7 @@ For all Task() calls, implement this pattern:
 ```javascript
 try {
   // Primary: plugin agent
-  result = Task(subagent_type="blueprint-helix:pdca-iterator", ...)
+  result = Task(subagent_type="blueprint:pdca-iterator", ...)
 } catch (AgentNotFoundError) {
   // Fallback: OMC agent with inline role prompt
   result = Task(subagent_type="oh-my-claudecode:analyst",

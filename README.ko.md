@@ -14,7 +14,7 @@ AI 지원 프로그래밍에 구조화된 개발 방법론을 도입하는 Claud
 ## 설치
 
 ```bash
-claude plugin add quantsquirrel/claude-blueprint-helix
+claude plugin add quantsquirrel/claude-blueprint
 ```
 
 ## 빠른 시작
@@ -134,10 +134,10 @@ Node.js 내장 기능만으로 구축:
   "phase_timeout_ms": 300000,
   "auto_act": false,
   "default_agents": {
-    "plan": ["oh-my-claudecode:analyst", "blueprint-helix:pdca-iterator"],
+    "plan": ["oh-my-claudecode:analyst", "blueprint:pdca-iterator"],
     "do": ["oh-my-claudecode:executor"],
     "check": ["oh-my-claudecode:verifier"],
-    "act": ["blueprint-helix:pdca-iterator"]
+    "act": ["blueprint:pdca-iterator"]
   }
 }
 ```

@@ -1,5 +1,5 @@
 {
-  "name": "@quantsquirrel/claude-blueprint-helix",
+  "name": "@quantsquirrel/claude-blueprint",
   "version": "1.0.0",
   "description": "PDCA cycle, Gap Analysis, and Dev Pipeline plugin for Claude Code - systematic development through iterative improvement",
   "type": "module",

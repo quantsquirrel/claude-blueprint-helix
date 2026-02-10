@@ -282,7 +282,7 @@ function handleRequest(request) {
           result: {
             protocolVersion: '2024-11-05',
             serverInfo: {
-              name: 'blueprint-helix',
+              name: 'blueprint',
               version: '1.0.0'
             },
             capabilities: {

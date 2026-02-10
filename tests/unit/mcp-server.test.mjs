@@ -176,7 +176,7 @@ describe('blueprint-server.cjs JSON-RPC protocol', () => {
       assert.ok(response.result, 'should have result');
       assert.ok(response.result.capabilities, 'should have capabilities');
       assert.ok(response.result.serverInfo, 'should have serverInfo');
-      assert.equal(response.result.serverInfo.name, 'blueprint-helix');
+      assert.equal(response.result.serverInfo.name, 'blueprint');
       assert.equal(typeof response.result.serverInfo.version, 'string');
     });
   });

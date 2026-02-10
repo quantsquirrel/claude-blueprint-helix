@@ -48,7 +48,7 @@ Analyze current vs desired state:
 
 **Primary path:**
 ```javascript
-Task(subagent_type="blueprint-helix:gap-detector",
+Task(subagent_type="blueprint:gap-detector",
      model="opus",
      prompt="Analyze gap between current and desired state.\n\nCurrent scope: {scope}\nDesired state:\n{desired_state}\n\nIdentify missing features, architectural mismatches, and quality gaps.")
 ```
@@ -114,7 +114,7 @@ Effort/Impact: high=3, medium=2, low=1
 If `--generate-design` flag set:
 
 ```javascript
-Task(subagent_type="blueprint-helix:design-writer",
+Task(subagent_type="blueprint:design-writer",
      model="sonnet",
      prompt="Transform gap analysis into actionable design document.\n\nGap analysis: {gap_report}\n\nCreate design doc with:\n- Implementation phases\n- Acceptance criteria per gap\n- Dependencies and risks\n- Estimated effort")
 ```

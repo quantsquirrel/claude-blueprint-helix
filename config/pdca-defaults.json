@@ -3,9 +3,9 @@
   "phase_timeout_ms": 300000,
   "auto_act": false,
   "default_agents": {
-    "plan": ["oh-my-claudecode:analyst", "blueprint-helix:pdca-iterator"],
+    "plan": ["oh-my-claudecode:analyst", "blueprint:pdca-iterator"],
     "do": ["oh-my-claudecode:executor"],
     "check": ["oh-my-claudecode:verifier"],
-    "act": ["blueprint-helix:pdca-iterator"]
+    "act": ["blueprint:pdca-iterator"]
   }
 }

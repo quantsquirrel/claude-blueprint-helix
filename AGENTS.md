@@ -28,7 +28,7 @@ Custom agents for specialized analysis and orchestration.
   - Decides continuation or termination
 
 **Agent Discovery:**
-Agents are loaded from the plugin namespace (`blueprint-helix:agent-name`). If plugin agents are unavailable, inline prompts serve as fallbacks.
+Agents are loaded from the plugin namespace (`blueprint:agent-name`). If plugin agents are unavailable, inline prompts serve as fallbacks.
 
 ---
 
@@ -209,7 +209,7 @@ Multiple cycles/pipelines can run concurrently with ID-based isolation. Hooks ch
 
 ## Agent Discovery
 
-**Primary source:** Plugin agents (`blueprint-helix:agent-name`)
+**Primary source:** Plugin agents (`blueprint:agent-name`)
 
 **Fallback:** Inline prompts in skill handlers
 

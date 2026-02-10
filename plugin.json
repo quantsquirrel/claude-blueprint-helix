@@ -1,5 +1,5 @@
 {
-  "name": "blueprint-helix",
+  "name": "blueprint",
   "version": "1.0.0",
   "description": "PDCA cycle, Gap Analysis, and Dev Pipeline plugin for Claude Code - systematic development through iterative improvement",
   "author": {
