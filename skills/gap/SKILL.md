@@ -53,11 +53,11 @@ Task(subagent_type="blueprint:gap-detector",
      prompt="Analyze gap between current and desired state.\n\nCurrent scope: {scope}\nDesired state:\n{desired_state}\n\nIdentify missing features, architectural mismatches, and quality gaps.")
 ```
 
-**Fallback path:**
+**Fallback (if gap-detector unavailable):**
 ```javascript
-Task(subagent_type="oh-my-claudecode:architect",
+Task(subagent_type="blueprint:architect",
      model="opus",
-     prompt="You are a gap analysis specialist. Analyze the current codebase against this desired state:\n{desired_state}\n\nIdentify gaps in:\n- Features (missing functionality)\n- Architecture (structural mismatches)\n- Quality (tests, docs, error handling)\n- Dependencies (missing or outdated packages)\n\nCategorize by severity: CRITICAL/HIGH/MEDIUM/LOW")
+     prompt="Analyze the current codebase against this desired state:\n{desired_state}\n\nIdentify gaps by category (features/architecture/quality/dependencies) and severity (CRITICAL/HIGH/MEDIUM/LOW).")
 ```
 
 ### 3. Generate Gap Report
@@ -119,12 +119,12 @@ Task(subagent_type="blueprint:design-writer",
      prompt="Transform gap analysis into actionable design document.\n\nGap analysis: {gap_report}\n\nCreate design doc with:\n- Implementation phases\n- Acceptance criteria per gap\n- Dependencies and risks\n- Estimated effort")
 ```
 
-Output: Design document at `.omc/blueprint/gaps/designs/gap-{id}-design.md`
+Output: Design document at `.blueprint/gaps/designs/gap-{id}-design.md`
 
 ### 6. Save Analysis
-Write results to `.omc/blueprint/gaps/analyses/{analysis-id}.json`
+Write results to `.blueprint/gaps/analyses/{analysis-id}.json`
 
-Update index: `.omc/blueprint/gaps/analyses/index.json`
+Update index: `.blueprint/gaps/analyses/index.json`
 
 ## Gap Categories
 
@@ -212,9 +212,66 @@ Phase 3 (MEDIUM gaps): {N} items, {effort} days
 {if --generate-design: Link to generated design doc}
 
 ### Analysis Artifacts
-- Full report: `.omc/blueprint/gaps/analyses/{id}.json`
-- Design doc: `.omc/blueprint/gaps/designs/{id}-design.md` (if generated)
+- Full report: `.blueprint/gaps/analyses/{id}.json`
+- Design doc: `.blueprint/gaps/designs/{id}-design.md` (if generated)
 ```
+
+## Output Schema
+
+The gap analysis produces structured output that can be validated downstream.
+
+```json
+{
+  "gap_report": {
+    "type": "object",
+    "required": ["id", "desired_state", "scope", "gaps", "summary"],
+    "properties": {
+      "id": { "type": "string", "pattern": "^gap-\\d{8}-\\d{6}$" },
+      "desired_state": { "type": "string" },
+      "scope": { "type": "string", "enum": ["file", "dir", "project"] },
+      "timestamp": { "type": "string", "format": "date-time" },
+      "gaps": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["category", "severity", "title", "description"],
+          "properties": {
+            "category": { "type": "string", "enum": ["features", "architecture", "quality", "dependencies"] },
+            "severity": { "type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"] },
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "current_state": { "type": "string" },
+            "desired_state": { "type": "string" },
+            "effort": { "type": "string", "enum": ["high", "medium", "low"] },
+            "impact": { "type": "string", "enum": ["high", "medium", "low"] }
+          }
+        }
+      },
+      "summary": {
+        "type": "object",
+        "required": ["total_gaps", "by_severity", "by_category"],
+        "properties": {
+          "total_gaps": { "type": "integer", "minimum": 0 },
+          "by_severity": { "type": "object" },
+          "by_category": { "type": "object" }
+        }
+      }
+    }
+  },
+  "design_doc": {
+    "type": "object",
+    "required": ["phases", "acceptance_criteria"],
+    "properties": {
+      "phases": { "type": "array", "items": { "type": "object" } },
+      "acceptance_criteria": { "type": "array", "items": { "type": "string" } },
+      "dependencies": { "type": "array", "items": { "type": "string" } },
+      "risks": { "type": "array", "items": { "type": "string" } }
+    }
+  }
+}
+```
+
+Agents SHOULD structure their output to match these schemas. Downstream consumers MAY validate against them.
 
 ## Common Issues
 
@@ -237,7 +294,7 @@ User: `/blueprint:gap "complete REST API with pagination, filtering, auth" --sco
    - HIGH: No filtering (current: no query params, desired: filter by fields)
    - MEDIUM: No rate limiting (current: none, desired: rate limit per user)
 4. **Prioritize**: Sort by priority score
-5. **Save**: Write to `.omc/blueprint/gaps/analyses/gap-20260210-143022.json`
+5. **Save**: Write to `.blueprint/gaps/analyses/gap-20260210-143022.json`
 6. **Output**: Report with 4 gaps, roadmap with 2 phases
 
 Result: Clear roadmap showing authentication as Phase 1, pagination/filtering as Phase 2

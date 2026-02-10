@@ -5,13 +5,13 @@
  * Preserves active blueprint state before context compaction.
  * Creates a recovery marker so session-loader can restore on next SessionStart.
  *
- * Pattern: OMC pre-compact.mjs
+ * Pattern: blueprint pre-compact
  */
 
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  findOmcRoot,
+  findBlueprintRoot,
   loadState,
   saveState,
   ensureDir,
@@ -126,7 +126,7 @@ async function main() {
 
     let blueprintDir;
     try {
-      blueprintDir = findOmcRoot(directory);
+      blueprintDir = findBlueprintRoot(directory);
     } catch {
       process.stdout.write(JSON.stringify({ continue: true }));
       return;

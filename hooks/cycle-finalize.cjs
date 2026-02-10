@@ -5,7 +5,7 @@
  * Suspends active PDCA cycles and pipeline runs when the session stops.
  * Must be CJS because Stop hooks require synchronous-style execution.
  *
- * Pattern: OMC persistent-mode.cjs
+ * Pattern: blueprint persistent-mode
  *
  * NOTE: state-manager.mjs is ESM, so we cannot require() it.
  * We implement the needed file operations directly using Node.js builtins.
@@ -22,7 +22,7 @@ const {
 } = require('fs');
 const { join, dirname } = require('path');
 
-// Inline readStdin for CJS (pattern from OMC persistent-mode.cjs)
+// Inline readStdin for CJS
 async function readStdin(timeoutMs = 5000) {
   return new Promise((resolve) => {
     const chunks = [];
@@ -73,19 +73,19 @@ function writeJsonFile(filePath, data) {
   }
 }
 
-// Walk up from startDir to find .omc/ or .git/ root, return .omc/blueprint/ path
+// Walk up from startDir to find .blueprint/ or .git/ root, return .blueprint/ path
 function findBlueprintDir(startDir) {
   let dir = startDir;
   const root = '/';
 
   while (dir !== root) {
-    if (existsSync(join(dir, '.omc'))) {
-      const bp = join(dir, '.omc', 'blueprint');
+    if (existsSync(join(dir, '.blueprint'))) {
+      const bp = join(dir, '.blueprint');
       if (!existsSync(bp)) mkdirSync(bp, { recursive: true });
       return bp;
     }
     if (existsSync(join(dir, '.git'))) {
-      const bp = join(dir, '.omc', 'blueprint');
+      const bp = join(dir, '.blueprint');
       if (!existsSync(bp)) mkdirSync(bp, { recursive: true });
       return bp;
     }
@@ -93,7 +93,7 @@ function findBlueprintDir(startDir) {
   }
 
   // Fallback: use startDir
-  const bp = join(startDir, '.omc', 'blueprint');
+  const bp = join(startDir, '.blueprint');
   if (!existsSync(bp)) mkdirSync(bp, { recursive: true });
   return bp;
 }

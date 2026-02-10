@@ -155,7 +155,7 @@ model: sonnet
     4. Proceed to Phase 2 after Phase 1 verification
 
     ## References
-    - Gap Analysis: `.omc/blueprint/gaps/analyses/{id}.json`
+    - Gap Analysis: `.blueprint/gaps/analyses/{id}.json`
     - Current codebase: `{relevant files}`
     - Documentation: `{relevant docs}`
   </Output_Format>

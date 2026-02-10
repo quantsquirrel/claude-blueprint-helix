@@ -103,7 +103,7 @@ Create pipeline state:
 }
 ```
 
-Save to: `.omc/blueprint/pipeline/runs/{pipeline-id}.json`
+Save to: `.blueprint/pipeline/runs/{pipeline-id}.json`
 
 ### 2. Execute Phases Sequentially
 For each phase:
@@ -116,15 +116,15 @@ For each phase:
 **Execute Phase:**
 ```javascript
 const phaseConfig = {
-  requirements: {agent: "oh-my-claudecode:analyst", model: "opus"},
-  architecture: {agent: "oh-my-claudecode:architect", model: "opus"},
+  requirements: {agent: "blueprint:analyst", model: "opus"},
+  architecture: {agent: "blueprint:architect", model: "opus"},
   design: {agent: "blueprint:design-writer", model: "sonnet"},
-  implementation: {agent: "oh-my-claudecode:executor", model: "sonnet"},
-  "unit-tests": {agent: "oh-my-claudecode:test-engineer", model: "sonnet"},
-  "integration-tests": {agent: "oh-my-claudecode:test-engineer", model: "sonnet"},
-  "code-review": {agent: "oh-my-claudecode:code-reviewer", model: "opus"},
+  implementation: {agent: "blueprint:executor", model: "sonnet"},
+  "unit-tests": {agent: "blueprint:test-engineer", model: "sonnet"},
+  "integration-tests": {agent: "blueprint:test-engineer", model: "sonnet"},
+  "code-review": {agent: "blueprint:code-reviewer", model: "opus"},
   "gap-analysis": {agent: "blueprint:gap-detector", model: "opus"},
-  verification: {agent: "oh-my-claudecode:verifier", model: "sonnet"}
+  verification: {agent: "blueprint:verifier", model: "sonnet"}
 };
 
 const phase = phases[currentPhase];
@@ -184,7 +184,7 @@ if (phase.status === "failed" && phase.retries < 2) {
 /blueprint:pipeline --resume=pipeline-20260210-143022
 ```
 
-- Load state from `.omc/blueprint/pipeline/runs/{id}.json`
+- Load state from `.blueprint/pipeline/runs/{id}.json`
 - Verify status is "paused"
 - Resume from `current_phase`
 - Continue execution
@@ -197,7 +197,7 @@ jq '.status = "completed" |
     .completed_at = now' state.json > tmp && mv tmp state.json
 
 # Archive to history
-cp state.json .omc/blueprint/pipeline/history/{id}-{timestamp}.json
+cp state.json .blueprint/pipeline/history/{id}-{timestamp}.json
 ```
 
 ## Phase-Specific Instructions
@@ -318,7 +318,7 @@ End-to-end verification:
 [... all phases ...]
 
 ### Artifacts
-- Pipeline state: `.omc/blueprint/pipeline/runs/{id}.json`
+- Pipeline state: `.blueprint/pipeline/runs/{id}.json`
 - Phase outputs: [links to generated docs/code]
 
 ### Final Verification
@@ -328,6 +328,53 @@ End-to-end verification:
 - All acceptance criteria: MET
 ```
 
+## Output Schema
+
+Each pipeline phase produces structured output that can be validated downstream.
+
+```json
+{
+  "phase_output": {
+    "type": "object",
+    "required": ["phase_name", "status", "output"],
+    "properties": {
+      "phase_name": { "type": "string" },
+      "status": { "type": "string", "enum": ["completed", "failed", "skipped"] },
+      "retries": { "type": "integer", "minimum": 0 },
+      "output": { "type": "string" },
+      "artifacts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string", "enum": ["document", "code", "test", "report"] },
+            "path": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+  "pipeline_result": {
+    "type": "object",
+    "required": ["id", "status", "phases_completed", "phases_total"],
+    "properties": {
+      "id": { "type": "string", "pattern": "^pipeline-\\d{8}-\\d{6}$" },
+      "feature": { "type": "string" },
+      "preset": { "type": "string", "enum": ["full", "standard", "minimal"] },
+      "status": { "type": "string", "enum": ["completed", "failed", "paused"] },
+      "phases_completed": { "type": "integer", "minimum": 0 },
+      "phases_total": { "type": "integer", "minimum": 1 },
+      "phases_skipped": { "type": "integer", "minimum": 0 },
+      "phases_failed": { "type": "integer", "minimum": 0 },
+      "started_at": { "type": "string", "format": "date-time" },
+      "completed_at": { "type": "string", "format": "date-time" }
+    }
+  }
+}
+```
+
+Agents SHOULD structure their output to match these schemas. Downstream consumers MAY validate against them.
+
 ## Common Issues
 
 | Issue | Solution |
@@ -335,7 +382,7 @@ End-to-end verification:
 | Phase fails repeatedly | Use --on-error=pause, manually fix, then --resume |
 | Pipeline too long | Use --preset=minimal or --skip-phases |
 | Need to restart from middle | Use --start-phase=N (ensure previous phases already completed) |
-| Agent not available | Pipeline auto-falls back to OMC equivalent agents |
+| Agent not available | Pipeline uses inline prompts as fallback |
 
 ## Example Session
 

@@ -5,7 +5,7 @@
  * Detects /blueprint:pdca, /blueprint:gap, /blueprint:pipeline, /blueprint:cancel keywords
  * and emits additionalContext to instruct Claude on the detected mode.
  *
- * Pattern: OMC keyword-detector.mjs
+ * Pattern: blueprint keyword-detector
  */
 
 import { join, dirname } from 'node:path';
@@ -70,7 +70,7 @@ Available operations:
 - Start a new PDCA cycle with a clear objective
 - Progress through phases: Plan -> Do -> Check -> Act
 - Each phase requires explicit completion before moving to the next
-- Use state files in .omc/blueprint/pdca/ for tracking
+- Use state files in .blueprint/pdca/ for tracking
 
 Follow the PDCA methodology strictly:
 1. PLAN: Define objectives, metrics, and approach

@@ -5,13 +5,13 @@
  * Tracks phase progression for active PDCA cycles and pipeline runs.
  * Only processes Task, Write, Edit, Bash tool calls; ignores the rest.
  *
- * Pattern: OMC post-tool-verifier.mjs
+ * Pattern: blueprint post-tool-verifier
  */
 
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  findOmcRoot,
+  findBlueprintRoot,
   loadState,
   saveState,
   acquireLock,
@@ -122,7 +122,7 @@ async function main() {
     // Find blueprint state directory
     let blueprintDir;
     try {
-      blueprintDir = findOmcRoot(data.cwd || data.directory || process.cwd());
+      blueprintDir = findBlueprintRoot(data.cwd || data.directory || process.cwd());
     } catch {
       process.stdout.write(JSON.stringify({ continue: true }));
       return;

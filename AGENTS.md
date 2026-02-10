@@ -9,10 +9,16 @@ A structured development methodology plugin for Claude Code with PDCA cycles, ga
 Custom agents for specialized analysis and orchestration.
 
 **Files:**
-- `gap-detector.md` - Read-only gap analysis agent (opus model)
-  - Compares current state vs desired state
-  - Identifies gaps by severity (critical/high/medium/low)
-  - Generates actionable recommendations
+- `analyst.md` - Requirements analysis agent (opus model)
+  - Analyzes requirements and produces specifications
+  - Identifies edge cases and boundary conditions
+  - Defines testable acceptance criteria
+  - Used in pipeline requirements phase
+
+- `architect.md` - Architecture design agent (opus model, read-only)
+  - Designs component boundaries and interfaces
+  - Evaluates technology trade-offs
+  - Assesses scalability and security implications
   - No file modifications (analysis only)
 
 - `design-writer.md` - Design document generation agent (sonnet model)
@@ -21,14 +27,44 @@ Custom agents for specialized analysis and orchestration.
   - Produces implementation-ready specifications
   - Used in pipeline design phase
 
+- `executor.md` - Code implementation agent (sonnet model)
+  - Implements code changes from design documents
+  - Follows existing project patterns and conventions
+  - Runs verification checks after implementation
+  - Used in pipeline implementation phase
+
+- `gap-detector.md` - Read-only gap analysis agent (opus model)
+  - Compares current state vs desired state
+  - Identifies gaps by severity (critical/high/medium/low)
+  - Generates actionable recommendations
+  - No file modifications (analysis only)
+
 - `pdca-iterator.md` - PDCA cycle orchestration agent (sonnet model)
   - Manages Plan-Do-Check-Act iterations
   - Coordinates phase transitions
   - Evaluates cycle completion criteria
   - Decides continuation or termination
 
+- `reviewer.md` - Code review agent (sonnet model, read-only)
+  - Comprehensive code review (correctness, security, maintainability)
+  - Severity-rated findings with file:line references
+  - Design adherence verification
+  - No file modifications (review only)
+
+- `tester.md` - Test engineering agent (sonnet model)
+  - Designs and implements test strategies
+  - Creates unit and integration tests
+  - Analyzes coverage and edge cases
+  - Used in pipeline test phases
+
+- `verifier.md` - Verification agent (sonnet model, read-only)
+  - Verifies implementation against acceptance criteria
+  - Runs tests and checks build status
+  - Evidence-based PASS/FAIL verdicts
+  - No file modifications (verification only)
+
 **Agent Discovery:**
-Agents are loaded from the plugin namespace (`blueprint:agent-name`). If plugin agents are unavailable, inline prompts serve as fallbacks.
+Agents are loaded from the plugin namespace (`blueprint:agent-name`). If a plugin agent is unavailable, inline prompts within skill handlers serve as fallbacks. No external dependencies required.
 
 ---
 
@@ -74,7 +110,7 @@ Claude Code hooks for event-driven behavior.
   - Triggers next phase when gates are met
 
 - `session-loader.mjs` - State restoration (SessionStart hook)
-  - Loads active cycles/pipelines from `.omc/blueprint/`
+  - Loads active cycles/pipelines from `.blueprint/`
   - Restores in-progress workflows
   - Displays restoration summary
 
@@ -108,7 +144,7 @@ MCP (Model Context Protocol) server for external tool access.
     - `pdca_status` - Query active PDCA cycle state (ID, phase, iteration, progress)
     - `gap_measure` - Measure gap metrics (severity distribution, closure rate)
     - `pipeline_progress` - Check pipeline progress (current phase, gates passed, ETA)
-  - Stateless design (reads from `.omc/blueprint/`)
+  - Stateless design (reads from `.blueprint/`)
   - Handles concurrent requests
 
 **Integration:**
@@ -189,7 +225,7 @@ Test end-to-end workflows (complete PDCA cycle, pipeline execution, concurrent o
 
 ## State Management
 
-**Location:** `.omc/blueprint/`
+**Location:** `.blueprint/`
 
 **File naming:**
 - PDCA cycles: `pdca-{ID}.json`
@@ -215,8 +251,7 @@ Multiple cycles/pipelines can run concurrently with ID-based isolation. Hooks ch
 
 **Precedence:**
 1. Plugin agent (if available)
-2. oh-my-claudecode agent (if pattern matches)
-3. Inline prompt (last resort)
+2. Inline prompt (fallback)
 
 **Example:**
 ```javascript

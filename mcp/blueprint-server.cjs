@@ -22,26 +22,26 @@ const readline = require('readline');
 // ============================================================================
 
 /**
- * Find .omc/blueprint/ directory by walking up from cwd.
- * @returns {string|null} Absolute path to .omc/blueprint/ or null if not found
+ * Find .blueprint/ directory by walking up from cwd.
+ * @returns {string|null} Absolute path to .blueprint/ or null if not found
  */
-function findOmcRoot() {
+function findBlueprintRoot() {
   let dir = process.cwd();
   const root = path.parse(dir).root;
 
   while (dir !== root) {
-    const omcPath = path.join(dir, '.omc', 'blueprint');
-    if (fs.existsSync(path.join(dir, '.omc'))) {
-      return omcPath;
+    const bpPath = path.join(dir, '.blueprint');
+    if (fs.existsSync(bpPath)) {
+      return bpPath;
     }
     if (fs.existsSync(path.join(dir, '.git'))) {
-      return omcPath;
+      return bpPath;
     }
     dir = path.dirname(dir);
   }
 
   // Fallback: use cwd
-  return path.join(process.cwd(), '.omc', 'blueprint');
+  return path.join(process.cwd(), '.blueprint');
 }
 
 /**
@@ -88,8 +88,8 @@ function listJsonFiles(dirPath) {
  * @returns {object} { cycles: [...] }
  */
 function pdcaStatus(args) {
-  const omcRoot = findOmcRoot();
-  const cyclesDir = path.join(omcRoot, 'pdca', 'cycles');
+  const bpRoot = findBlueprintRoot();
+  const cyclesDir = path.join(bpRoot, 'pdca', 'cycles');
 
   const cycles = [];
   const files = listJsonFiles(cyclesDir);
@@ -124,8 +124,8 @@ function pdcaStatus(args) {
  * @returns {object} { analyses: [...] }
  */
 function gapMeasure(args) {
-  const omcRoot = findOmcRoot();
-  const analysesDir = path.join(omcRoot, 'gaps', 'analyses');
+  const bpRoot = findBlueprintRoot();
+  const analysesDir = path.join(bpRoot, 'gaps', 'analyses');
 
   const analyses = [];
   const files = listJsonFiles(analysesDir);
@@ -178,8 +178,8 @@ function gapMeasure(args) {
  * @returns {object} { pipelines: [...] }
  */
 function pipelineProgress(args) {
-  const omcRoot = findOmcRoot();
-  const runsDir = path.join(omcRoot, 'pipeline', 'runs');
+  const bpRoot = findBlueprintRoot();
+  const runsDir = path.join(bpRoot, 'pipeline', 'runs');
 
   const pipelines = [];
   const files = listJsonFiles(runsDir);

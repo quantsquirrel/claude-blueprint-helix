@@ -4,22 +4,22 @@ import { homedir, hostname } from 'node:os';
 import { randomBytes } from 'node:crypto';
 
 /**
- * Walk up from cwd to find .omc/ directory or git root.
- * Creates .omc/blueprint/ if needed.
- * @returns {string} Absolute path to .omc/blueprint/
+ * Walk up from cwd to find .blueprint/ directory or git root.
+ * Creates .blueprint/ if needed.
+ * @returns {string} Absolute path to .blueprint/
  */
-export function findOmcRoot(startDir = process.cwd()) {
+export function findBlueprintRoot(startDir = process.cwd()) {
   let dir = startDir;
   const root = dirname(dir) === dir ? dir : '/';
 
   while (dir !== root) {
-    if (existsSync(join(dir, '.omc'))) {
-      const blueprintDir = join(dir, '.omc', 'blueprint');
+    if (existsSync(join(dir, '.blueprint'))) {
+      const blueprintDir = join(dir, '.blueprint');
       ensureDir(blueprintDir);
       return blueprintDir;
     }
     if (existsSync(join(dir, '.git'))) {
-      const blueprintDir = join(dir, '.omc', 'blueprint');
+      const blueprintDir = join(dir, '.blueprint');
       ensureDir(blueprintDir);
       return blueprintDir;
     }
@@ -27,7 +27,7 @@ export function findOmcRoot(startDir = process.cwd()) {
   }
 
   // Fallback: use cwd
-  const blueprintDir = join(startDir, '.omc', 'blueprint');
+  const blueprintDir = join(startDir, '.blueprint');
   ensureDir(blueprintDir);
   return blueprintDir;
 }

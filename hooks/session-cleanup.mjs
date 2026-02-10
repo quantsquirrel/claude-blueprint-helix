@@ -4,13 +4,13 @@
  * Session Cleanup Hook (SessionEnd)
  * Archives active states, removes stale locks, and cleans up orphaned files.
  *
- * Pattern: OMC session-end.mjs
+ * Pattern: blueprint session-end
  */
 
 import { existsSync, readdirSync, unlinkSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  findOmcRoot,
+  findBlueprintRoot,
   loadState,
   archiveState,
   checkStaleness,
@@ -119,7 +119,7 @@ async function main() {
 
     let blueprintDir;
     try {
-      blueprintDir = findOmcRoot(directory);
+      blueprintDir = findBlueprintRoot(directory);
     } catch {
       process.stdout.write(JSON.stringify({ continue: true }));
       return;

@@ -37,7 +37,7 @@ Example: `/blueprint:pdca "improve auth module error handling" --max-iterations=
 
 ### 1. Initialize
 - Generate unique cycle-id (format: `pdca-{timestamp}`)
-- Create state file at `.omc/blueprint/pdca/cycles/{cycle-id}.json`
+- Create state file at `.blueprint/pdca/cycles/{cycle-id}.json`
 - Set initial phase to "plan"
 
 State file format:
@@ -63,17 +63,11 @@ State file format:
 ### 2. Plan Phase
 Spawn agents to analyze current state and create improvement plan:
 
-**Primary path (with fallback):**
 ```javascript
-// Try plugin agent first
 Task(subagent_type="blueprint:pdca-iterator",
      model="sonnet",
      prompt="Plan phase: Analyze task and create improvement plan.\nTask: {user_task}\nIteration: {N}")
 
-// Fallback if plugin agent unavailable
-Task(subagent_type="oh-my-claudecode:analyst",
-     model="opus",
-     prompt="You are a PDCA cycle orchestrator in Plan phase.\nAnalyze: {user_task}\nCreate actionable improvement plan with specific targets.")
 ```
 
 Output: Structured plan with clear quality targets and acceptance criteria
@@ -82,7 +76,7 @@ Output: Structured plan with clear quality targets and acceptance criteria
 Implement the plan created in Plan phase:
 
 ```javascript
-Task(subagent_type="oh-my-claudecode:executor",
+Task(subagent_type="blueprint:executor",
      model="sonnet",
      prompt="Implement the following PDCA plan:\n{plan_output}\n\nTask: {user_task}")
 ```
@@ -93,7 +87,7 @@ Output: Implementation changes with file:line references
 Verify implementation against quality targets:
 
 ```javascript
-Task(subagent_type="oh-my-claudecode:verifier",
+Task(subagent_type="blueprint:verifier",
      model="sonnet",
      prompt="Verify PDCA implementation meets targets:\nPlan: {plan_output}\nImplementation: {do_output}\nCheck all acceptance criteria.")
 ```
@@ -103,17 +97,11 @@ Output: Verification report with pass/fail on each target
 ### 5. Act Phase
 Decide whether to continue iterating or complete:
 
-**Primary path (with fallback):**
 ```javascript
-// Try plugin agent first
 Task(subagent_type="blueprint:pdca-iterator",
      model="sonnet",
      prompt="Act phase: Review verification results and decide next action.\nVerification: {check_output}\nIteration: {N}/{max_iterations}")
 
-// Fallback if plugin agent unavailable
-Task(subagent_type="oh-my-claudecode:analyst",
-     model="opus",
-     prompt="You are a PDCA cycle orchestrator in Act phase.\nReview: {check_output}\nDecide: CONTINUE (if targets not met) or COMPLETE (if targets met or max iterations reached)")
 ```
 
 Decisions:
@@ -123,7 +111,7 @@ Decisions:
 ### 6. Finalize
 When complete:
 - Set status='completed' in state file
-- Archive to `.omc/blueprint/pdca/history/{cycle-id}-{timestamp}.json`
+- Archive to `.blueprint/pdca/history/{cycle-id}-{timestamp}.json`
 - Generate summary report
 
 ## Output Format
@@ -163,7 +151,7 @@ When complete:
 
 ## State Management
 
-**Active cycles tracked in**: `.omc/blueprint/pdca/active-cycles.json`
+**Active cycles tracked in**: `.blueprint/pdca/active-cycles.json`
 ```json
 {
   "cycles": [
@@ -181,6 +169,61 @@ jq '.current_phase = "do" | .updated_at = now' state.json > tmp && mv tmp state.
 jq '.phases.plan.status = "completed" | .phases.plan.output = "..."' state.json > tmp && mv tmp state.json
 ```
 
+## Output Schema
+
+Each phase produces structured output that can be validated downstream.
+
+```json
+{
+  "plan_output": {
+    "type": "object",
+    "required": ["targets", "acceptance_criteria", "approach"],
+    "properties": {
+      "targets": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+      "acceptance_criteria": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+      "approach": { "type": "string" }
+    }
+  },
+  "do_output": {
+    "type": "object",
+    "required": ["changes", "files_modified"],
+    "properties": {
+      "changes": { "type": "array", "items": { "type": "string" } },
+      "files_modified": { "type": "array", "items": { "type": "string", "pattern": "^.+:\\d+$" } }
+    }
+  },
+  "check_output": {
+    "type": "object",
+    "required": ["verdict", "criteria_results"],
+    "properties": {
+      "verdict": { "type": "string", "enum": ["PASS", "FAIL"] },
+      "criteria_results": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["criterion", "status"],
+          "properties": {
+            "criterion": { "type": "string" },
+            "status": { "type": "string", "enum": ["pass", "fail"] },
+            "evidence": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+  "act_output": {
+    "type": "object",
+    "required": ["decision", "reason"],
+    "properties": {
+      "decision": { "type": "string", "enum": ["CONTINUE", "COMPLETE"] },
+      "reason": { "type": "string" }
+    }
+  }
+}
+```
+
+Agents SHOULD structure their output to match these schemas. Downstream consumers MAY validate against them.
+
 ## Common Issues
 
 | Issue | Solution |
@@ -191,22 +234,18 @@ jq '.phases.plan.status = "completed" | .phases.plan.output = "..."' state.json 
 | Infinite loops | Enforce max_iterations hard limit |
 | Lost context between iterations | Always include previous iteration summary in next Plan |
 
-## Agent Fallback Pattern
+## Agent Resolution
 
-For all Task() calls, implement this pattern:
+All agents are provided by this plugin (`blueprint:*` namespace). Available agents:
 
-```javascript
-try {
-  // Primary: plugin agent
-  result = Task(subagent_type="blueprint:pdca-iterator", ...)
-} catch (AgentNotFoundError) {
-  // Fallback: OMC agent with inline role prompt
-  result = Task(subagent_type="oh-my-claudecode:analyst",
-                prompt="You are a PDCA cycle orchestrator...\n{specific_instructions}")
-}
-```
+| Agent | Role | Model |
+|-------|------|-------|
+| `blueprint:pdca-iterator` | PDCA cycle orchestration (Plan/Act phases) | sonnet |
+| `blueprint:analyst` | Requirements analysis (Plan fallback) | opus |
+| `blueprint:executor` | Code implementation (Do phase) | sonnet |
+| `blueprint:verifier` | Verification (Check phase) | sonnet |
 
-This ensures the skill works even when the plugin agent is unavailable.
+If a plugin agent is unavailable, the skill falls back to inline prompts within the Task call.
 
 ## Example Session
 

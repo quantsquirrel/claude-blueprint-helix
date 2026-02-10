@@ -97,10 +97,16 @@ claude plugin add quantsquirrel/claude-blueprint
   - `Stop` - 우아한 종료
   - `SessionEnd` - 정리
 
-- **3개 커스텀 에이전트** - 특화된 분석
-  - `gap-detector` (opus) - 읽기 전용 갭 분석
+- **9개 커스텀 에이전트** - 자체 에이전트 카탈로그
+  - `analyst` (opus) - 요구사항 분석
+  - `architect` (opus, 읽기 전용) - 아키텍처 설계
   - `design-writer` (sonnet) - 설계 문서 생성
+  - `executor` (sonnet) - 코드 구현
+  - `gap-detector` (opus, 읽기 전용) - 갭 분석
   - `pdca-iterator` (sonnet) - PDCA 사이클 오케스트레이션
+  - `reviewer` (sonnet, 읽기 전용) - 코드 리뷰
+  - `tester` (sonnet) - 테스트 엔지니어링
+  - `verifier` (sonnet, 읽기 전용) - 검증
 
 - **1개 MCP 서버** - 외부 도구 접근
   - `pdca_status` - PDCA 사이클 상태 조회
@@ -109,7 +115,7 @@ claude plugin add quantsquirrel/claude-blueprint
 
 ### 상태 관리
 
-상태 파일은 `.omc/blueprint/`에 저장됨:
+상태 파일은 `.blueprint/`에 저장됨:
 - ID 기반 격리 (여러 사이클/파이프라인 동시 실행 가능)
 - 락 프로토콜로 경쟁 조건 방지
 - 종료 시 세션 정리
@@ -134,9 +140,9 @@ Node.js 내장 기능만으로 구축:
   "phase_timeout_ms": 300000,
   "auto_act": false,
   "default_agents": {
-    "plan": ["oh-my-claudecode:analyst", "blueprint:pdca-iterator"],
-    "do": ["oh-my-claudecode:executor"],
-    "check": ["oh-my-claudecode:verifier"],
+    "plan": ["blueprint:analyst", "blueprint:pdca-iterator"],
+    "do": ["blueprint:executor"],
+    "check": ["blueprint:verifier"],
     "act": ["blueprint:pdca-iterator"]
   }
 }
@@ -171,6 +177,17 @@ Node.js 내장 기능만으로 구축:
 ```
 
 요구사항부터 검증까지 전체 9단계를 거칩니다.
+
+## 독립 실행형 플러그인
+
+이 플러그인은 **완전히 자체 포함**되어 있으며 oh-my-claudecode(OMC)나 다른 플러그인에 의존하지 않습니다:
+
+- 9개 에이전트 모두 `agents/` 디렉토리에 포함
+- 모든 스킬은 `blueprint:*` 에이전트만 참조
+- 상태는 `.blueprint/`에 저장 (프로젝트 로컬, `~/.claude/`가 아님)
+- 외부 의존성 제로 (Node.js 내장 기능만 사용)
+
+모든 Claude Code 환경에서 바로 사용 가능합니다.
 
 ## 라이선스
 

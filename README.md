@@ -97,10 +97,16 @@ Stop running cycles or pipelines gracefully:
   - `Stop` - Graceful shutdown
   - `SessionEnd` - Cleanup
 
-- **3 Custom Agents** - Specialized analysis
-  - `gap-detector` (opus) - Read-only gap analysis
+- **9 Custom Agents** - Self-contained agent catalog
+  - `analyst` (opus) - Requirements analysis
+  - `architect` (opus, read-only) - Architecture design
   - `design-writer` (sonnet) - Design document generation
+  - `executor` (sonnet) - Code implementation
+  - `gap-detector` (opus, read-only) - Gap analysis
   - `pdca-iterator` (sonnet) - PDCA cycle orchestration
+  - `reviewer` (sonnet, read-only) - Code review
+  - `tester` (sonnet) - Test engineering
+  - `verifier` (sonnet, read-only) - Verification
 
 - **1 MCP Server** - External tool access
   - `pdca_status` - Query PDCA cycle state
@@ -109,7 +115,7 @@ Stop running cycles or pipelines gracefully:
 
 ### State Management
 
-State files stored at `.omc/blueprint/`:
+State files stored at `.blueprint/`:
 - ID-based isolation (multiple cycles/pipelines can run concurrently)
 - Lock protocol prevents race conditions
 - Session cleanup on exit
@@ -134,9 +140,9 @@ Configuration files in `config/`:
   "phase_timeout_ms": 300000,
   "auto_act": false,
   "default_agents": {
-    "plan": ["oh-my-claudecode:analyst", "blueprint:pdca-iterator"],
-    "do": ["oh-my-claudecode:executor"],
-    "check": ["oh-my-claudecode:verifier"],
+    "plan": ["blueprint:analyst", "blueprint:pdca-iterator"],
+    "do": ["blueprint:executor"],
+    "check": ["blueprint:verifier"],
     "act": ["blueprint:pdca-iterator"]
   }
 }
@@ -171,6 +177,17 @@ Identifies blocking issues before merge.
 ```
 
 Walks through all 9 stages from requirements to verification.
+
+## Standalone Plugin
+
+This plugin is **fully self-contained** and does not depend on oh-my-claudecode (OMC) or any other plugin:
+
+- All 9 agents are bundled in the `agents/` directory
+- All skills reference only `blueprint:*` agents
+- State is stored in `.blueprint/` (project-local, not in `~/.claude/`)
+- Zero external dependencies (Node.js built-ins only)
+
+Works with any Claude Code installation out of the box.
 
 ## License
 

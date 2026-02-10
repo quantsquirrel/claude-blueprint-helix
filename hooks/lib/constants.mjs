@@ -30,7 +30,7 @@ export const PIPELINE_PRESETS = {
   }
 };
 
-// State file paths (relative to .omc/blueprint/)
+// State file paths (relative to .blueprint/)
 export const STATE_PATHS = {
   pdca: {
     cycles: 'pdca/cycles',

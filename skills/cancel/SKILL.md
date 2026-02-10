@@ -38,16 +38,16 @@ Scan for active blueprint operations:
 **Check PDCA cycles:**
 ```bash
 # Read active cycles index
-ACTIVE_CYCLES=$(cat .omc/blueprint/pdca/active-cycles.json 2>/dev/null || echo '{"cycles":[]}')
+ACTIVE_CYCLES=$(cat .blueprint/pdca/active-cycles.json 2>/dev/null || echo '{"cycles":[]}')
 
 # List all cycle state files
-find .omc/blueprint/pdca/cycles/ -name "*.json" -exec jq -r 'select(.status=="active") | .id' {} \;
+find .blueprint/pdca/cycles/ -name "*.json" -exec jq -r 'select(.status=="active") | .id' {} \;
 ```
 
 **Check pipeline runs:**
 ```bash
 # Find active or paused pipeline runs
-find .omc/blueprint/pipeline/runs/ -name "*.json" -exec jq -r 'select(.status=="running" or .status=="paused") | .id' {} \;
+find .blueprint/pipeline/runs/ -name "*.json" -exec jq -r 'select(.status=="running" or .status=="paused") | .id' {} \;
 ```
 
 ### 2. Present Findings
@@ -79,7 +79,7 @@ For each operation, update status to 'cancelled':
 
 **PDCA cycle:**
 ```bash
-CYCLE_FILE=".omc/blueprint/pdca/cycles/${cycle_id}.json"
+CYCLE_FILE=".blueprint/pdca/cycles/${cycle_id}.json"
 
 jq '.status = "cancelled" |
     .cancelled_at = now |
@@ -89,7 +89,7 @@ jq '.status = "cancelled" |
 
 **Pipeline run:**
 ```bash
-PIPELINE_FILE=".omc/blueprint/pipeline/runs/${pipeline_id}.json"
+PIPELINE_FILE=".blueprint/pipeline/runs/${pipeline_id}.json"
 
 jq '.status = "cancelled" |
     .cancelled_at = now |
@@ -103,19 +103,19 @@ Move cancelled operations to history:
 **PDCA cycle:**
 ```bash
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-mkdir -p .omc/blueprint/pdca/history/
+mkdir -p .blueprint/pdca/history/
 
-mv ".omc/blueprint/pdca/cycles/${cycle_id}.json" \
-   ".omc/blueprint/pdca/history/${cycle_id}-${TIMESTAMP}.json"
+mv ".blueprint/pdca/cycles/${cycle_id}.json" \
+   ".blueprint/pdca/history/${cycle_id}-${TIMESTAMP}.json"
 ```
 
 **Pipeline run:**
 ```bash
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-mkdir -p .omc/blueprint/pipeline/history/
+mkdir -p .blueprint/pipeline/history/
 
-mv ".omc/blueprint/pipeline/runs/${pipeline_id}.json" \
-   ".omc/blueprint/pipeline/history/${pipeline_id}-${TIMESTAMP}.json"
+mv ".blueprint/pipeline/runs/${pipeline_id}.json" \
+   ".blueprint/pipeline/history/${pipeline_id}-${TIMESTAMP}.json"
 ```
 
 ### 5. Index Cleanup Phase
@@ -125,14 +125,14 @@ Remove cancelled operations from active indices:
 ```bash
 jq --arg id "$cycle_id" \
    '.cycles = [.cycles[] | select(.id != $id)]' \
-   .omc/blueprint/pdca/active-cycles.json > tmp && mv tmp .omc/blueprint/pdca/active-cycles.json
+   .blueprint/pdca/active-cycles.json > tmp && mv tmp .blueprint/pdca/active-cycles.json
 ```
 
 **Update pipeline active-runs.json (if exists):**
 ```bash
 jq --arg id "$pipeline_id" \
    '.runs = [.runs[] | select(.id != $id)]' \
-   .omc/blueprint/pipeline/active-runs.json > tmp && mv tmp .omc/blueprint/pipeline/active-runs.json
+   .blueprint/pipeline/active-runs.json > tmp && mv tmp .blueprint/pipeline/active-runs.json
 ```
 
 ### 6. Output Phase
@@ -146,16 +146,16 @@ Generate cancellation summary:
 **PDCA Cycles (2)**
 - pdca-20260210-143022: "improve auth module"
   - Status: iteration 2/4, phase: check
-  - Archived to: `.omc/blueprint/pdca/history/pdca-20260210-143022-20260210-160000.json`
+  - Archived to: `.blueprint/pdca/history/pdca-20260210-143022-20260210-160000.json`
 
 - pdca-20260210-150000: "refactor API layer"
   - Status: iteration 1/3, phase: do
-  - Archived to: `.omc/blueprint/pdca/history/pdca-20260210-150000-20260210-160000.json`
+  - Archived to: `.blueprint/pdca/history/pdca-20260210-150000-20260210-160000.json`
 
 **Pipeline Runs (1)**
 - pipeline-20260210-144500: "user dashboard"
   - Status: phase 4/6 (paused)
-  - Archived to: `.omc/blueprint/pipeline/history/pipeline-20260210-144500-20260210-160000.json`
+  - Archived to: `.blueprint/pipeline/history/pipeline-20260210-144500-20260210-160000.json`
 
 ### Summary
 - Total operations cancelled: 3
@@ -190,7 +190,7 @@ If immediate termination is critical, you may need to manually kill the agent pr
 |-------|----------|
 | "No operations found" but I know one is running | Check if state file exists; agent may not have written it yet |
 | Agent continues after cancel | Normal; agent will stop at next phase boundary |
-| Cannot access state files | Verify .omc/blueprint/ directories exist and have correct permissions |
+| Cannot access state files | Verify .blueprint/ directories exist and have correct permissions |
 | Archive fails | Ensure history/ directories exist; create them manually if needed |
 
 ## Example Sessions
@@ -252,24 +252,24 @@ Nothing to cancel.
 ## State File Locations
 
 **PDCA:**
-- Active: `.omc/blueprint/pdca/cycles/{id}.json`
-- Index: `.omc/blueprint/pdca/active-cycles.json`
-- History: `.omc/blueprint/pdca/history/{id}-{timestamp}.json`
+- Active: `.blueprint/pdca/cycles/{id}.json`
+- Index: `.blueprint/pdca/active-cycles.json`
+- History: `.blueprint/pdca/history/{id}-{timestamp}.json`
 
 **Pipeline:**
-- Active: `.omc/blueprint/pipeline/runs/{id}.json`
-- Index: `.omc/blueprint/pipeline/active-runs.json` (optional)
-- History: `.omc/blueprint/pipeline/history/{id}-{timestamp}.json`
+- Active: `.blueprint/pipeline/runs/{id}.json`
+- Index: `.blueprint/pipeline/active-runs.json` (optional)
+- History: `.blueprint/pipeline/history/{id}-{timestamp}.json`
 
 ## Verification
 
 After cancellation, verify:
 ```bash
 # Check no active cycles remain
-jq '.cycles | length' .omc/blueprint/pdca/active-cycles.json
+jq '.cycles | length' .blueprint/pdca/active-cycles.json
 # Output: 0
 
 # Check history contains archived operations
-ls -l .omc/blueprint/pdca/history/
-ls -l .omc/blueprint/pipeline/history/
+ls -l .blueprint/pdca/history/
+ls -l .blueprint/pipeline/history/
 ```

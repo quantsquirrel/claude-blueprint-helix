@@ -5,13 +5,13 @@
  * Loads active cycles/pipelines, checks agent availability,
  * cleans up orphaned state from previous sessions.
  *
- * Pattern: OMC session-start.mjs
+ * Pattern: blueprint session-start
  */
 
 import { existsSync, readdirSync, unlinkSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import {
-  findOmcRoot,
+  findBlueprintRoot,
   loadState,
   saveState,
   listActiveItems,
@@ -173,7 +173,7 @@ async function main() {
 
     let blueprintDir;
     try {
-      blueprintDir = findOmcRoot(directory);
+      blueprintDir = findBlueprintRoot(directory);
     } catch {
       process.stdout.write(JSON.stringify({ continue: true }));
       return;

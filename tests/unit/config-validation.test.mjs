@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -128,33 +128,9 @@ describe('config file validation', () => {
   });
 
   describe('.mcp.json', () => {
-    let config;
-
-    it('should be valid JSON', () => {
-      config = readJsonConfig('.mcp.json');
-      assert.ok(config);
-    });
-
-    it('should have mcpServers object', () => {
-      config = readJsonConfig('.mcp.json');
-      assert.ok(config.mcpServers, 'should have mcpServers');
-      assert.equal(typeof config.mcpServers, 'object');
-    });
-
-    it('server paths should use ${CLAUDE_PLUGIN_ROOT} variable', () => {
-      config = readJsonConfig('.mcp.json');
-      for (const [, server] of Object.entries(config.mcpServers)) {
-        const argsStr = JSON.stringify(server.args);
-        assert.ok(
-          argsStr.includes('${CLAUDE_PLUGIN_ROOT}'),
-          'server args should reference ${CLAUDE_PLUGIN_ROOT}'
-        );
-      }
-    });
-
-    it('blueprint server should use node command', () => {
-      config = readJsonConfig('.mcp.json');
-      assert.equal(config.mcpServers.blueprint.command, 'node');
+    it('should not exist (removed in v1.1.0 - MCP server registered via plugin.json)', () => {
+      const mcpPath = join(projectRoot, '.mcp.json');
+      assert.ok(!existsSync(mcpPath), '.mcp.json should not exist (removed in v1.1.0)');
     });
   });
 
