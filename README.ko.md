@@ -10,6 +10,7 @@
 [![📜 License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 [![🟢 Node](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg?style=flat-square)](https://nodejs.org)
 [![✅ Status](https://img.shields.io/badge/status-stable-brightgreen.svg?style=flat-square)](https://github.com/quantsquirrel/claude-blueprint-helix)
+[![🔄 CI](https://img.shields.io/github/actions/workflow/status/quantsquirrel/claude-blueprint-helix/ci.yml?branch=main&style=flat-square&logo=github-actions&label=CI)](https://github.com/quantsquirrel/claude-blueprint-helix/actions/workflows/ci.yml)
 [![⭐ Stars](https://img.shields.io/github/stars/quantsquirrel/claude-blueprint-helix?style=flat-square&logo=github)](https://github.com/quantsquirrel/claude-blueprint-helix/stargazers)
 
 </div>
