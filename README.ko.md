@@ -6,10 +6,10 @@
 
 **[English](README.md)** · **[한국어](README.ko.md)**
 
-[![⚡ Version](https://img.shields.io/badge/version-1.2.0-blue.svg?style=flat-square)](https://github.com/quantsquirrel/claude-blueprint-helix)
+[![⚡ Version](https://img.shields.io/badge/version-1.0.0-blue.svg?style=flat-square)](https://github.com/quantsquirrel/claude-blueprint-helix)
 [![📜 License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 [![🟢 Node](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg?style=flat-square)](https://nodejs.org)
-[![🚧 Status](https://img.shields.io/badge/status-beta-yellow.svg?style=flat-square)](https://github.com/quantsquirrel/claude-blueprint-helix)
+[![✅ Status](https://img.shields.io/badge/status-stable-brightgreen.svg?style=flat-square)](https://github.com/quantsquirrel/claude-blueprint-helix)
 [![⭐ Stars](https://img.shields.io/github/stars/quantsquirrel/claude-blueprint-helix?style=flat-square&logo=github)](https://github.com/quantsquirrel/claude-blueprint-helix/stargazers)
 
 </div>
@@ -87,6 +87,47 @@ claude plugin add quantsquirrel/claude-blueprint
 ```
 /blueprint:cancel --all
 ```
+
+## 언제 사용해야 하나요?
+
+> **Blueprint = 설계자** (무엇을, 왜 만들 것인가) · **Claude Code = 시공자** (어떻게 만들 것인가)
+
+**방향이 불확실할 때** Blueprint를 사용하세요. 작업이 **명확하고 구체적이면** Claude Code를 직접 사용하세요.
+
+### 의사결정 가이드
+
+| 현재 상황 | 스킬 | 한 줄 이유 |
+|:---|:---|:---|
+| 🩺 "뭔가 문제인데 정확히 뭔지 모르겠다" | `/blueprint:gap` | 현재 상태와 목표 상태 사이의 격차를 진단 |
+| 📈 "측정 가능한 반복적 개선이 필요하다" | `/blueprint:pdca` | 가설 → 테스트 → 측정 루프 실행 |
+| 🚀 "대규모 기능을 처음부터 구현해야 한다" | `/blueprint:pipeline` | 단계별 게이트로 빠짐없이 진행 보장 |
+| ⛔ "방향이 틀렸다, 즉시 중단" | `/blueprint:cancel` | 좀비 세션으로 인한 리소스 낭비 방지 |
+
+### 워크플로우 패턴
+
+**단독 사용 (OMC 없이)**
+
+```
+1. /blueprint:gap "프로덕션 배포 준비 상태 점검"   → 진단
+2. Claude Code: 이슈를 하나씩 수정                  → 실행
+3. /blueprint:pdca "테스트 커버리지 80% 달성"       → 검증 & 반복
+```
+
+**OMC와 함께 사용 (B-O-B-O 사이클)**
+
+```
+Blueprint:gap  →  OMC:실행  →  Blueprint:검증  →  OMC:교정
+  (전략)          (행동)       (측정)            (조정)
+```
+
+<details>
+<summary>사용하지 말아야 할 때 (안티패턴)</summary>
+
+- 문제 파악 없이 `/blueprint:pipeline`을 실행하지 **마세요** — 먼저 `/blueprint:gap`으로 진단하세요
+- 일회성 수정에 `/blueprint:pdca`를 사용하지 **마세요** — 반복적 개선을 위해 설계되었습니다
+- 워크플로우를 포기한 후 `/blueprint:cancel`을 잊지 **마세요** — 좀비 세션이 컨텍스트를 낭비합니다
+
+</details>
 
 ## 스킬 참조
 

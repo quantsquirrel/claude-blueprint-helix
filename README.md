@@ -6,10 +6,10 @@
 
 **[English](README.md)** · **[한국어](README.ko.md)**
 
-[![⚡ Version](https://img.shields.io/badge/version-1.2.0-blue.svg?style=flat-square)](https://github.com/quantsquirrel/claude-blueprint-helix)
+[![⚡ Version](https://img.shields.io/badge/version-1.0.0-blue.svg?style=flat-square)](https://github.com/quantsquirrel/claude-blueprint-helix)
 [![📜 License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 [![🟢 Node](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg?style=flat-square)](https://nodejs.org)
-[![🚧 Status](https://img.shields.io/badge/status-beta-yellow.svg?style=flat-square)](https://github.com/quantsquirrel/claude-blueprint-helix)
+[![✅ Status](https://img.shields.io/badge/status-stable-brightgreen.svg?style=flat-square)](https://github.com/quantsquirrel/claude-blueprint-helix)
 [![⭐ Stars](https://img.shields.io/github/stars/quantsquirrel/claude-blueprint-helix?style=flat-square&logo=github)](https://github.com/quantsquirrel/claude-blueprint-helix/stargazers)
 
 </div>
@@ -87,6 +87,47 @@ Stop running cycles or pipelines gracefully:
 ```
 /blueprint:cancel --all
 ```
+
+## When to Use Each Skill
+
+> **Blueprint = Architect** (what to build & why) · **Claude Code = Builder** (how to build it)
+
+Use Blueprint when you're **uncertain about direction**. Use Claude Code directly when the task is **clear and specific**.
+
+### Decision Guide
+
+| Your Situation | Skill | One-Line Reason |
+|:---|:---|:---|
+| 🩺 "Something's wrong but I don't know what" | `/blueprint:gap` | Diagnoses the gap between current and desired state |
+| 📈 "I need measurable, iterative improvement" | `/blueprint:pdca` | Runs hypothesis → test → measure loops |
+| 🚀 "Building a large feature from scratch" | `/blueprint:pipeline` | Enforces gates so no step is skipped |
+| ⛔ "Wrong direction, stop everything" | `/blueprint:cancel` | Prevents resource waste on zombie sessions |
+
+### Workflow Patterns
+
+**Standalone (without OMC)**
+
+```
+1. /blueprint:gap "production readiness check"     → diagnose
+2. Claude Code: fix issues one by one               → execute
+3. /blueprint:pdca "improve test coverage to 80%"   → verify & iterate
+```
+
+**With OMC (B-O-B-O Cycle)**
+
+```
+Blueprint:gap  →  OMC:execute  →  Blueprint:check  →  OMC:correct
+  (strategy)       (action)        (measure)          (adjust)
+```
+
+<details>
+<summary>When NOT to use Blueprint (anti-patterns)</summary>
+
+- **Don't** run `/blueprint:pipeline` without first knowing the problem — use `/blueprint:gap` first
+- **Don't** use `/blueprint:pdca` for one-off fixes — it's designed for iterative improvement
+- **Don't** forget `/blueprint:cancel` after abandoning a workflow — zombie sessions waste context
+
+</details>
 
 ## Skills Reference
 
