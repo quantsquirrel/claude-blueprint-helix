@@ -2,6 +2,8 @@
 
 <div align="center">
 
+![Blueprint Helix Hero Banner](assets/hero-banner.svg)
+
 **[English](README.md)** · **[한국어](README.ko.md)**
 
 [![⚡ Version](https://img.shields.io/badge/version-1.2.0-blue.svg?style=flat-square)](https://github.com/quantsquirrel/claude-blueprint-helix)
@@ -145,6 +147,137 @@ Built entirely with Node.js built-ins:
 - No external packages required
 - Minimal installation footprint
 - Fast startup and execution
+
+## Visual Architecture
+
+### Blueprint + OMC Workflow Integration
+
+```mermaid
+graph TB
+    subgraph "Strategic Layer - Blueprint"
+        B1[Blueprint:gap<br/>Gap Analysis]
+        B2[Blueprint:pdca check<br/>Verification]
+        B3[Blueprint:pdca act<br/>Decision Making]
+    end
+
+    subgraph "Tactical Layer - OMC"
+        O1[OMC:Execute<br/>ultrawork/team/autopilot]
+        O2[OMC:Refine<br/>code-review/tdd]
+    end
+
+    B1 -->|Gap Report, WBS| O1
+    O1 -->|Implementation| B2
+    B2 -->|Verification Report| O2
+    O2 -->|Fixes Complete| B3
+    B3 -->|Next Cycle| B1
+
+    style B1 fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style B2 fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style B3 fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style O1 fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style O2 fill:#fff3e0,stroke:#e65100,stroke-width:2px
+```
+
+**Key Principle**: Blueprint = Strategy (What/Why), OMC = Tactics (How)
+
+### Pipeline Stage Progression
+
+```mermaid
+stateDiagram-v2
+    [*] --> Requirements
+
+    Requirements --> Design: standard/full
+    Requirements --> Architecture: full only
+    Architecture --> Design
+
+    Design --> Implementation
+    Implementation --> UnitTest
+
+    UnitTest --> IntegrationTest: full only
+    UnitTest --> CodeReview: standard/minimal
+
+    IntegrationTest --> CodeReview
+    CodeReview --> GapAnalysis: full only
+    CodeReview --> Verification: standard/minimal
+
+    GapAnalysis --> Verification
+    Verification --> [*]: Success
+
+    note right of Requirements
+        analyst (opus)
+    end note
+
+    note right of Implementation
+        executor (sonnet)
+        Parallel execution
+    end note
+
+    note right of Verification
+        verifier (sonnet)
+        Final gate check
+    end note
+```
+
+### Agent Interaction Pattern
+
+```mermaid
+sequenceDiagram
+    participant Skill as Skill Orchestrator
+    participant Analyst as analyst (opus)
+    participant Executor as executor (sonnet)
+    participant Verifier as verifier (sonnet)
+    participant State as State Manager
+
+    Skill->>State: Initialize Workflow
+    State-->>Skill: Workflow ID
+
+    Skill->>Analyst: Analyze Requirements
+    activate Analyst
+    Analyst->>Analyst: Read & Analyze
+    Analyst-->>Skill: Requirements Doc
+    deactivate Analyst
+
+    Skill->>State: Save Requirements
+
+    Skill->>Executor: Implement Code
+    activate Executor
+    Executor->>State: Read Requirements
+    Executor->>Executor: Write Code
+    Executor-->>Skill: Implementation Done
+    deactivate Executor
+
+    Skill->>Verifier: Verify Results
+    activate Verifier
+    Verifier->>State: Read All Context
+    Verifier->>Verifier: Run Checks
+    Verifier-->>Skill: Verification Report
+    deactivate Verifier
+
+    Skill->>State: Update Final State
+```
+
+### State Management
+
+```mermaid
+graph TB
+    Root[".blueprint/"] --> PDCA["pdca/"]
+    Root --> Pipeline["pipeline/"]
+    Root --> Gap["gap/"]
+    Root --> Locks["locks/"]
+
+    PDCA --> P1["cycle-{id}.json"]
+    Pipeline --> PL1["pipeline-{id}.json"]
+    Gap --> G1["gap-{id}.json"]
+    Locks --> L1["{workflow-id}.lock"]
+
+    style Root fill:#1976d2,color:#fff
+    style PDCA fill:#4caf50,color:#fff
+    style Pipeline fill:#ff9800,color:#fff
+    style Gap fill:#9c27b0,color:#fff
+    style Locks fill:#f44336,color:#fff
+```
+
+For detailed architecture diagrams, see [docs/diagrams/](docs/diagrams/).
 
 ## Configuration
 

@@ -2,6 +2,8 @@
 
 <div align="center">
 
+![Blueprint Helix Hero 배너](assets/hero-banner.svg)
+
 **[English](README.md)** · **[한국어](README.ko.md)**
 
 [![⚡ Version](https://img.shields.io/badge/version-1.2.0-blue.svg?style=flat-square)](https://github.com/quantsquirrel/claude-blueprint-helix)
@@ -145,6 +147,137 @@ Node.js 내장 기능만으로 구축:
 - 외부 패키지 불필요
 - 최소한의 설치 공간
 - 빠른 시작 및 실행
+
+## 시각적 아키텍처
+
+### Blueprint + OMC 워크플로우 통합
+
+```mermaid
+graph TB
+    subgraph "전략 레이어 - Blueprint"
+        B1[Blueprint:gap<br/>갭 분석]
+        B2[Blueprint:pdca check<br/>검증]
+        B3[Blueprint:pdca act<br/>의사결정]
+    end
+
+    subgraph "전술 레이어 - OMC"
+        O1[OMC:실행<br/>ultrawork/team/autopilot]
+        O2[OMC:교정<br/>code-review/tdd]
+    end
+
+    B1 -->|갭 보고서, WBS| O1
+    O1 -->|구현 코드| B2
+    B2 -->|검증 리포트| O2
+    O2 -->|수정 완료| B3
+    B3 -->|다음 사이클| B1
+
+    style B1 fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style B2 fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style B3 fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style O1 fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style O2 fill:#fff3e0,stroke:#e65100,stroke-width:2px
+```
+
+**핵심 원칙**: Blueprint = 전략(무엇을/왜), OMC = 전술(어떻게)
+
+### 파이프라인 단계 진행
+
+```mermaid
+stateDiagram-v2
+    [*] --> Requirements
+
+    Requirements --> Design: standard/full
+    Requirements --> Architecture: full만
+    Architecture --> Design
+
+    Design --> Implementation
+    Implementation --> UnitTest
+
+    UnitTest --> IntegrationTest: full만
+    UnitTest --> CodeReview: standard/minimal
+
+    IntegrationTest --> CodeReview
+    CodeReview --> GapAnalysis: full만
+    CodeReview --> Verification: standard/minimal
+
+    GapAnalysis --> Verification
+    Verification --> [*]: 성공
+
+    note right of Requirements
+        analyst (opus)
+    end note
+
+    note right of Implementation
+        executor (sonnet)
+        병렬 실행
+    end note
+
+    note right of Verification
+        verifier (sonnet)
+        최종 게이트 검사
+    end note
+```
+
+### 에이전트 상호작용 패턴
+
+```mermaid
+sequenceDiagram
+    participant Skill as 스킬 오케스트레이터
+    participant Analyst as analyst (opus)
+    participant Executor as executor (sonnet)
+    participant Verifier as verifier (sonnet)
+    participant State as 상태 관리자
+
+    Skill->>State: 워크플로우 초기화
+    State-->>Skill: 워크플로우 ID
+
+    Skill->>Analyst: 요구사항 분석
+    activate Analyst
+    Analyst->>Analyst: 읽기 및 분석
+    Analyst-->>Skill: 요구사항 문서
+    deactivate Analyst
+
+    Skill->>State: 요구사항 저장
+
+    Skill->>Executor: 코드 구현
+    activate Executor
+    Executor->>State: 요구사항 읽기
+    Executor->>Executor: 코드 작성
+    Executor-->>Skill: 구현 완료
+    deactivate Executor
+
+    Skill->>Verifier: 결과 검증
+    activate Verifier
+    Verifier->>State: 전체 컨텍스트 읽기
+    Verifier->>Verifier: 검사 실행
+    Verifier-->>Skill: 검증 리포트
+    deactivate Verifier
+
+    Skill->>State: 최종 상태 업데이트
+```
+
+### 상태 관리
+
+```mermaid
+graph TB
+    Root[".blueprint/"] --> PDCA["pdca/"]
+    Root --> Pipeline["pipeline/"]
+    Root --> Gap["gap/"]
+    Root --> Locks["locks/"]
+
+    PDCA --> P1["cycle-{id}.json"]
+    Pipeline --> PL1["pipeline-{id}.json"]
+    Gap --> G1["gap-{id}.json"]
+    Locks --> L1["{workflow-id}.lock"]
+
+    style Root fill:#1976d2,color:#fff
+    style PDCA fill:#4caf50,color:#fff
+    style Pipeline fill:#ff9800,color:#fff
+    style Gap fill:#9c27b0,color:#fff
+    style Locks fill:#f44336,color:#fff
+```
+
+상세한 아키텍처 다이어그램은 [docs/diagrams/](docs/diagrams/)를 참조하세요.
 
 ## 설정
 
