@@ -28,6 +28,9 @@ A structured development methodology plugin for Claude Code that implements PDCA
 | `mcp/` | MCP server exposing Blueprint tools via JSON-RPC (see `mcp/AGENTS.md`) |
 | `skills/` | User-invocable skills (slash commands) (see `skills/AGENTS.md`) |
 | `tests/` | Unit and integration tests (see `tests/AGENTS.md`) |
+| `assets/` | Visual assets - hero banner, SVG graphics (see `assets/AGENTS.md`) |
+| `docs/` | Architecture documentation and workflow guides (see `docs/AGENTS.md`) |
+| `.github/` | GitHub workflows - CI, PR checks, release automation |
 | `.claude/` | Session handoff storage (see `.claude/AGENTS.md`) |
 | `.claude-plugin/` | Plugin marketplace metadata (see `.claude-plugin/AGENTS.md`) |
 | `.omc/` | OMC state management and session data (see `.omc/AGENTS.md`) |
