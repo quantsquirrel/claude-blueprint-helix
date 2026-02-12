@@ -182,7 +182,7 @@ describe('blueprint-server.cjs JSON-RPC protocol', () => {
   });
 
   describe('tools/list', () => {
-    it('should list 3 tools: pdca_status, gap_measure, pipeline_progress', async () => {
+    it('should list 5 tools: pdca_status, gap_measure, pipeline_progress, pdca_update, pipeline_advance', async () => {
       const response = await sendJsonRpc({
         jsonrpc: '2.0',
         id: 2,
@@ -194,12 +194,14 @@ describe('blueprint-server.cjs JSON-RPC protocol', () => {
       assert.equal(response.id, 2);
       assert.ok(response.result, 'should have result');
       assert.ok(Array.isArray(response.result.tools), 'tools should be an array');
-      assert.equal(response.result.tools.length, 3);
+      assert.equal(response.result.tools.length, 5);
 
       const toolNames = response.result.tools.map(t => t.name);
       assert.ok(toolNames.includes('pdca_status'));
       assert.ok(toolNames.includes('gap_measure'));
       assert.ok(toolNames.includes('pipeline_progress'));
+      assert.ok(toolNames.includes('pdca_update'));
+      assert.ok(toolNames.includes('pipeline_advance'));
     });
 
     it('each tool should have name, description, and inputSchema', async () => {

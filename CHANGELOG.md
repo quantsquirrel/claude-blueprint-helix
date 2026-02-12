@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.2.0] - 2026-02-11
+## [1.0.0] - 2026-02-12
 
 ### Added
 
@@ -28,29 +28,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pipeline_advance` - Advance pipeline to next phase or update phase status
 - Buffered write via `pending_updates.json` (merged by cycle-finalize hook)
 
-### Changed
-
 #### Code Deduplication
 - Extracted shared `readStdin()` to `hooks/lib/io.mjs` (was duplicated in 5 ESM hooks)
 - ~120 lines of duplicated code removed
 
-#### Configuration
-- `config/pipeline-phases.json` default preset changed from `standard` to `auto`
-
----
-
-## [1.1.0] - 2026-02-10
-
-### Added
-
 #### Standalone Agent Suite (OMC-Independence)
-- 6 new custom agents for fully self-contained operation:
+- 9 custom agents for fully self-contained operation:
   - `blueprint:analyst` (opus) - Requirements analysis and acceptance criteria
   - `blueprint:executor` (sonnet) - Code implementation from design documents
   - `blueprint:verifier` (sonnet) - Evidence-based verification against acceptance criteria
   - `blueprint:architect` (opus) - Architecture design and trade-off evaluation (read-only)
   - `blueprint:reviewer` (sonnet) - Comprehensive code review with severity ratings (read-only)
   - `blueprint:tester` (sonnet) - Test strategy design and implementation
+  - `blueprint:gap-detector` (opus) - Deep gap analysis
+  - `blueprint:design-writer` (sonnet) - Design document generation
+  - `blueprint:pdca-iterator` (sonnet) - PDCA cycle orchestration
 
 #### Per-Project Agent Override
 - `config/agent-overrides.json` for per-project agent customization
@@ -63,34 +55,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Structured JSON schemas for phase outputs
   - Enables downstream validation of agent results
 
-### Changed
-
 #### Namespace Migration
 - Replaced all `oh-my-claudecode:*` agent references with `blueprint:*`
 - Migrated state directory from `.omc/blueprint/` to `.blueprint/`
 - Renamed internal `findOmcRoot()` to `findBlueprintRoot()`
 - Removed OMC fallback patterns from skill workflows
 - Plugin now operates fully independently without external plugin dependencies
-
-#### Agent Discovery
-- Agent resolution now uses 2-tier fallback: plugin agent → inline prompt
-- Removed 3-tier fallback (plugin → OMC → inline) for deterministic behavior
-
-#### Documentation
-- Updated AGENTS.md with all 9 agents (was 3)
-- Added "Standalone Plugin" section to README.md and README.ko.md
-- Updated `.gitignore` to include `.omc/` session cache
-
-### Removed
-- Runtime dependency on oh-my-claudecode (OMC) plugin
-- OMC agent fallback resolution paths
-- `.mcp.json` external server references
-
----
-
-## [1.0.0] - 2026-02-10
-
-### Added
 
 #### Core Skills
 - PDCA cycle skill (`/blueprint:pdca`) with iterative improvement loops
@@ -191,6 +161,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `config/pipeline-phases.json` for pipeline definition
   - 9 phases with agents and gates
   - 3 presets (full/standard/minimal)
+  - Auto-preset enabled by default
   - Error handling options
   - Retry limits
 
@@ -251,6 +222,4 @@ None (initial release)
 
 ---
 
-[1.2.0]: https://github.com/quantsquirrel/claude-blueprint-helix/releases/tag/v1.2.0
-[1.1.0]: https://github.com/quantsquirrel/claude-blueprint-helix/releases/tag/v1.1.0
 [1.0.0]: https://github.com/quantsquirrel/claude-blueprint-helix/releases/tag/v1.0.0

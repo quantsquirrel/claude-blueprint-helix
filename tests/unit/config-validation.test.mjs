@@ -78,18 +78,24 @@ describe('config file validation', () => {
       }
     });
 
-    it('should have presets object with full, standard, minimal', () => {
+    it('should have presets object with full, standard, minimal, auto', () => {
       config = readJsonConfig('config/pipeline-phases.json');
       assert.ok(config.presets, 'should have presets object');
       assert.ok('full' in config.presets);
       assert.ok('standard' in config.presets);
       assert.ok('minimal' in config.presets);
+      assert.ok('auto' in config.presets);
     });
 
-    it('each preset should have phases array and description', () => {
+    it('each preset should have phases (array or null) and description', () => {
       config = readJsonConfig('config/pipeline-phases.json');
       for (const [name, preset] of Object.entries(config.presets)) {
-        assert.ok(Array.isArray(preset.phases), `preset ${name} should have phases array`);
+        // 'auto' preset has phases: null for auto-detection
+        if (name === 'auto') {
+          assert.equal(preset.phases, null, `preset ${name} should have phases: null for auto-detection`);
+        } else {
+          assert.ok(Array.isArray(preset.phases), `preset ${name} should have phases array`);
+        }
         assert.equal(typeof preset.description, 'string', `preset ${name} should have description`);
       }
     });

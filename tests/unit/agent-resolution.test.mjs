@@ -35,12 +35,12 @@ describe('Agent Resolution - OMC Independence', () => {
   });
 
   it('should not reference oh-my-claudecode in any source file', () => {
-    const ALLOWED_FILES = new Set(['CHANGELOG.md', 'agent-resolution.test.mjs']);
+    const ALLOWED_FILES = new Set(['CHANGELOG.md', 'agent-resolution.test.mjs', 'AGENTS.md']);
     const violations = [];
     for (const filePath of sourceFiles) {
       const relativePath = filePath.replace(PROJECT_ROOT + '/', '');
       const fileName = relativePath.split('/').pop();
-      // Skip files that legitimately mention OMC (changelog history, this test, READMEs)
+      // Skip files that legitimately mention OMC (changelog history, this test, READMEs, AGENTS.md)
       if (ALLOWED_FILES.has(fileName)) continue;
       if (relativePath.startsWith('README')) continue;
       const content = readFileSync(filePath, 'utf-8');
@@ -56,7 +56,7 @@ describe('Agent Resolution - OMC Independence', () => {
   });
 
   it('should not reference .omc/blueprint/ state path in any source file', () => {
-    const ALLOWED_FILES = new Set(['CHANGELOG.md', 'agent-resolution.test.mjs']);
+    const ALLOWED_FILES = new Set(['CHANGELOG.md', 'agent-resolution.test.mjs', 'AGENTS.md']);
     const violations = [];
     for (const filePath of sourceFiles) {
       const relativePath = filePath.replace(PROJECT_ROOT + '/', '');
@@ -103,7 +103,7 @@ describe('Agent Resolution - OMC Independence', () => {
 
   it('should have all 9 agents in the agents/ directory', () => {
     const agentsDir = join(PROJECT_ROOT, 'agents');
-    const agentFiles = readdirSync(agentsDir).filter(f => f.endsWith('.md'));
+    const agentFiles = readdirSync(agentsDir).filter(f => f.endsWith('.md') && f !== 'AGENTS.md');
     const expectedAgents = [
       'analyst.md', 'architect.md', 'design-writer.md', 'executor.md',
       'gap-detector.md', 'pdca-iterator.md', 'reviewer.md', 'tester.md', 'verifier.md'

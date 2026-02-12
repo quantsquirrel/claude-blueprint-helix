@@ -4,7 +4,7 @@
 
 <div align="center">
 
-**Current Version: 1.2.0** | **Status: Beta** | **Next Major: 2.0.0**
+**Current Version: 1.0.0** | **Status: Production** | **Next Minor: 1.1.0**
 
 </div>
 
@@ -22,7 +22,7 @@ Transform claude-blueprint-helix from a systematic development methodology plugi
 
 ---
 
-## Current State (v1.2.0)
+## Current State (v1.0.0)
 
 ### ✅ Shipped Features
 
@@ -70,7 +70,7 @@ Transform claude-blueprint-helix from a systematic development methodology plugi
 
 ## Short-Term Roadmap (3-6 Months)
 
-### v1.3.0 - Enhanced Observability (Target: March 2026)
+### v1.1.0 - Enhanced Observability (Target: March 2026)
 
 **Theme:** Make workflows visible, debuggable, and explainable
 
@@ -111,7 +111,7 @@ Transform claude-blueprint-helix from a systematic development methodology plugi
 
 ---
 
-### v1.4.0 - Intelligent Adaptation (Target: May 2026)
+### v1.2.0 - Intelligent Adaptation (Target: May 2026)
 
 **Theme:** Workflows that learn and adapt
 
@@ -150,7 +150,7 @@ Transform claude-blueprint-helix from a systematic development methodology plugi
 
 ---
 
-### v1.5.0 - Ecosystem Integration (Target: July 2026)
+### v1.3.0 - Ecosystem Integration (Target: July 2026)
 
 **Theme:** Connect with the broader development ecosystem
 
@@ -360,7 +360,7 @@ The following features are explicitly reserved for community voting:
 
 ### Product Metrics
 
-| Metric | Current (v1.2) | v1.5 Target | v2.0 Target |
+| Metric | Current (v1.0) | v1.3 Target | v2.0 Target |
 |--------|----------------|-------------|-------------|
 | Installation Count | - | 1,000+ | 10,000+ |
 | Active Users (MAU) | - | 200+ | 2,000+ |
@@ -461,7 +461,7 @@ We welcome community input on this roadmap:
 
 ## Appendix: Detailed Feature Specs
 
-### Workflow Visualization Dashboard (v1.3.0)
+### Workflow Visualization Dashboard (v1.1.0)
 
 **Overview:** Real-time web-based dashboard for monitoring active workflows
 
@@ -484,7 +484,7 @@ We welcome community input on this roadmap:
 - Pause/resume workflows
 - Export results to JSON/CSV
 
-### Smart Preset Recommendation (v1.4.0)
+### Smart Preset Recommendation (v1.2.0)
 
 **Overview:** ML-based complexity analyzer with contextual recommendations
 
