@@ -1,6 +1,24 @@
 # claude-blueprint-helix
 
+<div align="center">
+
+**[English](README.md)** · **[한국어](README.ko.md)**
+
+[![⚡ Version](https://img.shields.io/badge/version-1.2.0-blue.svg?style=flat-square)](https://github.com/quantsquirrel/claude-blueprint-helix)
+[![📜 License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
+[![🟢 Node](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg?style=flat-square)](https://nodejs.org)
+[![🚧 Status](https://img.shields.io/badge/status-beta-yellow.svg?style=flat-square)](https://github.com/quantsquirrel/claude-blueprint-helix)
+[![⭐ Stars](https://img.shields.io/github/stars/quantsquirrel/claude-blueprint-helix?style=flat-square&logo=github)](https://github.com/quantsquirrel/claude-blueprint-helix/stargazers)
+
+</div>
+
 > Systematic development through iterative improvement: PDCA cycles, Gap Analysis, and Dev Pipeline for Claude Code
+
+<div align="center">
+
+**🔄 Plan-Do-Check-Act** → **📊 Gap Analysis** → **🚀 Dev Pipeline** → **✅ Better Code**
+
+</div>
 
 A Claude Code plugin that brings structured development methodologies to AI-assisted programming. Build better software through continuous improvement cycles, systematic gap analysis, and phased development pipelines.
 

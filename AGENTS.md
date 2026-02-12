@@ -1,8 +1,142 @@
+<!-- Generated: 2026-02-11T00:00:00Z | Updated: 2026-02-11T00:00:00Z -->
+
 # claude-blueprint-helix
 
-A structured development methodology plugin for Claude Code with PDCA cycles, gap analysis, and dev pipelines.
+## Purpose
 
-## Directory Guide
+A structured development methodology plugin for Claude Code that implements PDCA (Plan-Do-Check-Act) cycles, gap analysis, and phased development pipelines. Provides specialized agents, lifecycle hooks, and MCP tools for systematic code quality improvement and strategic development workflows.
+
+## Key Files
+
+| File | Description |
+|------|-------------|
+| `package.json` | Node.js package manifest with plugin metadata |
+| `plugin.json` | Claude Code plugin configuration |
+| `CHANGELOG.md` | Version history and release notes |
+| `README.md` | Project documentation (English) |
+| `README.ko.md` | Project documentation (Korean) |
+| `LICENSE` | MIT license file |
+| `.gitignore` | Git exclusion patterns |
+
+## Subdirectories
+
+| Directory | Purpose |
+|-----------|---------|
+| `agents/` | Specialized agent prompts for analysis and orchestration (see `agents/AGENTS.md`) |
+| `config/` | JSON configuration files for PDCA and pipeline customization (see `config/AGENTS.md`) |
+| `hooks/` | Claude Code lifecycle hooks for event-driven behavior (see `hooks/AGENTS.md`) |
+| `mcp/` | MCP server exposing Blueprint tools via JSON-RPC (see `mcp/AGENTS.md`) |
+| `skills/` | User-invocable skills (slash commands) (see `skills/AGENTS.md`) |
+| `tests/` | Unit and integration tests (see `tests/AGENTS.md`) |
+| `.claude/` | Session handoff storage (see `.claude/AGENTS.md`) |
+| `.claude-plugin/` | Plugin marketplace metadata (see `.claude-plugin/AGENTS.md`) |
+| `.omc/` | OMC state management and session data (see `.omc/AGENTS.md`) |
+| `.blueprint/` | Active workflow state (PDCA cycles, pipelines) - runtime generated |
+
+## For AI Agents
+
+### Working In This Directory
+
+- **Plugin structure**: This is a Claude Code plugin - `plugin.json` defines the integration points
+- **No external dependencies**: Project uses Node.js built-in modules only
+- **ESM by default**: Use `.mjs` for hooks and utilities; `.cjs` only for MCP server (compatibility)
+- **State management**: Active workflows stored in `.blueprint/` with file-based locking
+- **Agent discovery**: Agents loaded from plugin namespace (`blueprint:agent-name`) with inline fallbacks
+
+### Testing Requirements
+
+- Run unit tests: `node tests/unit/*.test.mjs`
+- Run integration tests: `node tests/integration/*.test.mjs`
+- Test in Claude Code: `claude plugin link .`
+- Coverage targets: state management, hook behavior, agent coordination
+
+### Common Patterns
+
+- **Async/await**: Prefer over callbacks for all async operations
+- **File locking**: Acquire lock → write state → release lock (see `hooks/lib/state-manager.mjs`)
+- **Hook isolation**: Each hook reads from `.blueprint/` independently
+- **Agent coordination**: Use phase gates for sequential workflows
+
+## Dependencies
+
+### Internal
+
+- `agents/` → Loaded by skills via plugin namespace or inline prompts
+- `config/` → Read by hooks and MCP server for runtime configuration
+- `hooks/lib/` → Shared utilities (constants, state manager, I/O)
+- `.blueprint/` → Runtime state directory (created on first workflow)
+
+### External
+
+**None** - Zero npm dependencies by design. Uses Node.js built-in modules:
+- `fs/promises` - File I/O
+- `path` - Path manipulation
+- `crypto` - ID generation
+
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ User invokes skill: /blueprint:pdca, /blueprint:gap, etc.   │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Hook detects keyword (blueprint-detect.mjs)                 │
+│ → Parses arguments, routes to skill handler                 │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Skill spawns agents (from agents/ or inline prompts)        │
+│ → Writes state to .blueprint/{type}-{ID}.json               │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Lifecycle hooks track progress (phase-tracker.mjs)          │
+│ → Updates state, triggers next phase when gates are met     │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────────┐
+│ On completion or stop: finalize/cleanup hooks run           │
+│ → Archives results, releases locks, resets state            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## State Management
+
+**Location**: `.blueprint/`
+
+**File naming**:
+- PDCA cycles: `pdca-{ID}.json`
+- Pipelines: `pipeline-{ID}.json`
+- Locks: `{type}-{ID}.lock`
+
+**Lock protocol**:
+1. Acquire lock before state modification
+2. Write state atomically
+3. Release lock after write
+4. Timeout locks after 5 minutes (stale lock cleanup)
+
+**Concurrency**: Multiple cycles/pipelines can run concurrently with ID-based isolation.
+
+## Plugin Integration
+
+**Registration**: `plugin.json` declares:
+- Agents: 9 specialized agents (analyst, architect, executor, etc.)
+- Skills: 4 user-invocable skills (pdca, gap, pipeline, cancel)
+- Hooks: 6 lifecycle hooks (session, compact, tool, stop events)
+- MCP Server: Blueprint tools (pdca_status, gap_measure, pipeline_progress)
+
+**Discovery**: Claude Code loads agents via `blueprint:agent-name` namespace. Fallback to inline prompts if agent fails to load.
+
+<!-- MANUAL: Detailed directory documentation below -->
+
+---
+
+## Detailed Directory Documentation
 
 ### agents/
 
@@ -223,71 +357,6 @@ Test end-to-end workflows (complete PDCA cycle, pipeline execution, concurrent o
 
 ---
 
-## State Management
-
-**Location:** `.blueprint/`
-
-**File naming:**
-- PDCA cycles: `pdca-{ID}.json`
-- Pipelines: `pipeline-{ID}.json`
-- Locks: `{type}-{ID}.lock`
-
-**Lock protocol:**
-1. Acquire lock before state modification
-2. Write state atomically
-3. Release lock after write
-4. Timeout locks after 5 minutes (stale lock cleanup)
-
-**Concurrency:**
-Multiple cycles/pipelines can run concurrently with ID-based isolation. Hooks check for active workflows on session start and resume them.
-
----
-
-## Agent Discovery
-
-**Primary source:** Plugin agents (`blueprint:agent-name`)
-
-**Fallback:** Inline prompts in skill handlers
-
-**Precedence:**
-1. Plugin agent (if available)
-2. Inline prompt (fallback)
-
-**Example:**
-```javascript
-const agent = await discoverAgent('gap-detector', fallbackPrompt);
-```
-
-This ensures the plugin works even if custom agents fail to load.
-
----
-
-## Development
-
-**Prerequisites:**
-- Node.js 18+ (uses built-in modules only)
-- Claude Code (for plugin hosting)
-
-**Local testing:**
-```bash
-# Run unit tests
-node tests/unit/*.test.js
-
-# Run integration tests
-node tests/integration/*.test.js
-
-# Test in Claude Code
-claude plugin link .
-```
-
-**Code style:**
-- ESM modules (`.mjs`) for hooks and utilities
-- CommonJS (`.cjs`) for MCP server (compatibility)
-- No external dependencies
-- Prefer async/await over callbacks
-
----
-
 ## Contributing
 
 1. Add tests for new features
@@ -300,4 +369,4 @@ claude plugin link .
 
 ## License
 
-MIT License - see [LICENSE](../LICENSE) for details.
+MIT License - see [LICENSE](./LICENSE) for details.
